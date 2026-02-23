@@ -1,0 +1,12 @@
+<svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="70" y1="40" x2="550" y2="580" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2A3D69" />
+      <stop offset="1" stop-color="#121A2E" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" rx="48" fill="url(#bg)" />
+  <circle cx="300" cy="230" r="95" fill="#8FB5FF" fill-opacity="0.75" />
+  <path d="M130 520C130 426.112 206.112 350 300 350C393.888 350 470 426.112 470 520" fill="#8FB5FF" fill-opacity="0.75" />
+  <text x="300" y="565" text-anchor="middle" fill="#DCE8FF" font-family="Segoe UI, Arial, sans-serif" font-size="30">Your Photo Here</text>
+</svg>

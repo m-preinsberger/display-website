@@ -1,0 +1,8 @@
+{
+  "name": "display-website",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm --prefix alethia-web ci && npm --prefix alethia-web run build && node -e \"const fs=require('node:fs');fs.rmSync('dist',{recursive:true,force:true});fs.cpSync('alethia-web/dist','dist',{recursive:true});\""
+  }
+}
