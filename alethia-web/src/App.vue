@@ -78,7 +78,19 @@
       <h2>Experience</h2>
       <div class="grid project-grid">
         <article class="card project-card">
-          <p class="project-tag">Track Machines Connected</p>
+          <a
+            class="project-company"
+            href="https://www.tmconnected.com/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="company-logo"
+              src="https://external-content.duckduckgo.com/ip3/www.tmconnected.com.ico"
+              alt="Track Machines Connected logo"
+            />
+            <span class="project-tag">Track Machines Connected</span>
+          </a>
           <h3>Edge Computing Intern</h3>
           <p>
             Linz, Upper Austria, Austria · July 2025 (1 month)
@@ -86,7 +98,19 @@
           <p class="project-outcome">Focused on edge computing topics in an industrial setting.</p>
         </article>
         <article class="card project-card">
-          <p class="project-tag">Track Machines Connected</p>
+          <a
+            class="project-company"
+            href="https://www.tmconnected.com/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="company-logo"
+              src="https://external-content.duckduckgo.com/ip3/www.tmconnected.com.ico"
+              alt="Track Machines Connected logo"
+            />
+            <span class="project-tag">Track Machines Connected</span>
+          </a>
           <h3>Edge Computing Intern</h3>
           <p>
             Linz, Upper Austria, Austria · July 2024 (1 month)
@@ -94,7 +118,19 @@
           <p class="project-outcome">Supported practical digital and technical use cases.</p>
         </article>
         <article class="card project-card">
-          <p class="project-tag">Peneder Gruppe</p>
+          <a
+            class="project-company"
+            href="https://www.peneder.com/de-at/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="company-logo"
+              src="https://www.google.com/s2/favicons?domain=www.peneder.com&sz=128"
+              alt="Peneder Gruppe logo"
+            />
+            <span class="project-tag">Peneder Gruppe</span>
+          </a>
           <h3>Production Planning and Control Intern</h3>
           <p>
             Fraham, Upper Austria, Austria · July 2023 (1 month)
@@ -107,15 +143,34 @@
     <section class="section" id="education">
       <h2>Education</h2>
       <div class="timeline">
-        <article>
+                <article>
           <span>01</span>
-          <h3>HTL Neufelden</h3>
-          <p>Business Informatics · September 2021 – May 2026</p>
+          <a class="school-link" href="https://www.europagym.at/" target="_blank" rel="noreferrer">
+            <img
+              class="school-logo"
+              src="https://www.europagym.at/wordpress/wp-content/uploads/2025/10/Logo-hell_Gimp-300x300.png"
+              alt="Europagymnasium Auhof logo"
+            />
+            <h3>Europagymnasium Auhof</h3>
+          </a>
+          <p>Physical Sciences · 2017 – 2021</p>
         </article>
         <article>
           <span>02</span>
-          <h3>Europagymnasium Auhof</h3>
-          <p>Physical Sciences · 2017 – 2021</p>
+          <a
+            class="school-link"
+            href="https://www.htl-neufelden.at"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="school-logo"
+              src="//external-content.duckduckgo.com/ip3/www.htl-neufelden.at.ico"
+              alt="HTL Neufelden logo"
+            />
+            <h3>HTL Neufelden</h3>
+          </a>
+          <p>Business Informatics · September 2021 – May 2026</p>
         </article>
       </div>
     </section>
@@ -127,15 +182,27 @@
         engineering and business informatics.
       </p>
       <div class="contact-links">
-        <a href="mailto:preinsbergermartin@gmail.com">preinsbergermartin@gmail.com</a>
+        <a class="contact-link" href="mailto:preinsbergermartin@gmail.com">
+          <span class="contact-emoji" aria-hidden="true">✉️</span>
+          <span>preinsbergermartin@gmail.com</span>
+        </a>
         <a
+          class="contact-link"
           href="https://www.linkedin.com/in/martin-preinsberger-a3943534b/"
           target="_blank"
           rel="noreferrer"
         >
-          LinkedIn Profile
+          <img
+            class="contact-icon"
+            src="https://www.google.com/s2/favicons?domain=www.linkedin.com&sz=128"
+            alt="LinkedIn logo"
+          />
+          <span>LinkedIn Profile</span>
         </a>
-        <a href="#education">Aschach an der Donau, Upper Austria, Austria</a>
+        <a class="contact-link" href="#education">
+          <span class="contact-emoji" aria-hidden="true">📍</span>
+          <span>Aschach an der Donau, Upper Austria, Austria</span>
+        </a>
       </div>
     </section>
   </main>

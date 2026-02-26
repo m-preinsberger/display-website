@@ -203,6 +203,24 @@ p {
   color: #95aff0;
 }
 
+.project-company {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+}
+
+.project-company:hover .project-tag {
+  color: #b4cbff;
+}
+
+.company-logo {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 0.35rem;
+  background: #f4f7ff;
+}
+
 .project-card p {
   color: #c5d0e6;
 }
@@ -247,6 +265,24 @@ p {
   color: #c4d0e6;
 }
 
+.school-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+}
+
+.school-link:hover h3 {
+  color: #9ec0ff;
+}
+
+.school-logo {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 0.4rem;
+  background: #f4f7ff;
+}
+
 .contact {
   padding: 1.45rem;
 }
@@ -265,6 +301,27 @@ p {
 .contact-links a {
   color: #9ec0ff;
   font-weight: 600;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.contact-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 0.25rem;
+  background: #f4f7ff;
+}
+
+.contact-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  font-size: 0.95rem;
 }
 
 .contact-links a:hover {
