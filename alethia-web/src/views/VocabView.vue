@@ -525,11 +525,10 @@ startQuiz()
           <button class="card-stage" type="button" @click="flipCard">
             <div v-if="currentCard" class="card-stage-content">
               <p class="card-front">{{ isFlipped ? currentCard.def : currentCard.term }}</p>
-              <p class="card-back">{{ isFlipped ? currentCard.term : currentCard.def }}</p>
             </div>
             <div v-else class="card-stage-content">
               <p class="card-front">No cards found.</p>
-              <p class="card-back">Try another set or clear search.</p>
+              <p class="hint">Try another set or clear search.</p>
             </div>
             <p class="hint">Click to flip</p>
           </button>
