@@ -13,7 +13,6 @@
           <div class="cta-group">
             <a class="btn primary" href="#experience">View Experience</a>
             <a class="btn ghost" href="#contact">Get In Touch</a>
-            <RouterLink class="btn ghost" to="/vocab">Open Private Vocab</RouterLink>
           </div>
         </div>
         <figure class="profile-photo">
