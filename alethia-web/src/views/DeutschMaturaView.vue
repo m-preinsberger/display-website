@@ -294,6 +294,24 @@ const writingActions = [
   },
 ]
 
+const predictedPackets = [
+  {
+    name: 'Paket 1',
+    combination: 'Textinterpretation + Kommentar',
+    note: 'Literarische Deutung kombiniert mit pointierter Stellungnahme.',
+  },
+  {
+    name: 'Paket 2',
+    combination: 'Textanalyse + Leserbrief oder Textanalyse + Kommentar',
+    note: 'Sachtextanalyse plus adressatenbezogene oder journalistische Positionierung.',
+  },
+  {
+    name: 'Paket 3',
+    combination: 'Meinungsrede + Zusammenfassung',
+    note: 'Überzeugende Rede kombiniert mit neutraler, knapper Wiedergabe.',
+  },
+]
+
 const completed = reactive(new Set<string>())
 const firstTextType = textTypes[0] as TextType
 const selectedId = ref(firstTextType.id)
@@ -394,15 +412,18 @@ hydrateProgress()
       </aside>
     </header>
 
-    <section class="official-note" aria-labelledby="official-title">
+    <section class="predictions-panel" aria-labelledby="predictions-title">
       <div>
-        <p class="eyebrow">Stand September 2020</p>
-        <h2 id="official-title">Was der Katalog wirklich prüfungsrelevant macht</h2>
+        <p class="eyebrow">Most likely 2026 packets</p>
+        <h2 id="predictions-title">Wahrscheinlichste Kombinationen</h2>
       </div>
-      <p>
-        Textsorten sind keine starren Vorlagen, sondern wiedererkennbare Muster für konkrete Kommunikationssituationen.
-        Für die SRDP werden sie über Ziel, Kontext, Schreibhandlungen, Struktur, Sprache und Umfang beschrieben.
-      </p>
+      <div class="prediction-grid">
+        <article v-for="packet in predictedPackets" :key="packet.name">
+          <strong>{{ packet.name }}</strong>
+          <p class="prediction-combination">{{ packet.combination }}</p>
+          <p>{{ packet.note }}</p>
+        </article>
+      </div>
     </section>
 
     <section class="exam-rule">
@@ -596,7 +617,7 @@ hydrateProgress()
 }
 
 .progress-panel,
-.official-note,
+.predictions-panel,
 .exam-rule,
 .path-panel,
 .detail-panel,
@@ -607,18 +628,43 @@ hydrateProgress()
   border-radius: 1rem;
 }
 
-.official-note {
+.predictions-panel {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(220px, 0.55fr) minmax(0, 1.45fr);
   gap: 1rem;
-  align-items: center;
+  align-items: start;
   padding: 1rem;
   margin-bottom: 1rem;
   background: linear-gradient(135deg, rgba(94, 234, 212, 0.1), rgba(26, 35, 59, 0.82));
 }
 
-.official-note p:last-child {
+.prediction-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.prediction-grid article {
+  border: 1px solid rgba(120, 148, 214, 0.2);
+  border-radius: 0.85rem;
+  background: rgba(16, 23, 40, 0.58);
+  padding: 0.85rem;
+}
+
+.prediction-grid strong {
+  display: block;
+  color: #a7f3d0;
+  margin-bottom: 0.35rem;
+}
+
+.prediction-grid p {
   color: #c4d0e8;
+}
+
+.prediction-combination {
+  color: #f4f7ff;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
 }
 
 .progress-panel {
@@ -909,11 +955,12 @@ hydrateProgress()
 
 @media (max-width: 900px) {
   .matura-hero,
-  .official-note,
+  .predictions-panel,
   .learning-layout,
   .focus-grid,
   .study-grid,
-  .action-grid {
+  .action-grid,
+  .prediction-grid {
     grid-template-columns: 1fr;
   }
 }
