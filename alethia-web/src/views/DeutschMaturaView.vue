@@ -4,11 +4,15 @@ import { computed, reactive, ref, watch } from 'vue'
 type TextType = {
   id: string
   title: string
+  definition: string
   goal: string
   wordCount: string
-  tone: string
+  context: string
+  actions: string[]
   structure: string[]
-  watch: string[]
+  criteria: string[]
+  language: string[]
+  boundary: string
   memory: string
   quiz: {
     question: string
@@ -21,109 +25,272 @@ const STORAGE_KEY = 'deutschmatura-learning-path-progress'
 
 const textTypes: TextType[] = [
   {
-    id: 'zusammenfassung',
-    title: 'Zusammenfassung',
-    goal: 'Ausgangstexte neutral, gekürzt und sachlich wiedergeben.',
-    wordCount: '270-330 Wörter',
-    tone: 'neutral, sachlich, Präsens',
-    structure: ['Einleitung mit Textdaten', 'Hauptaussagen logisch ordnen', 'Kein eigener Kommentar'],
-    watch: ['Keine Bewertung', 'Keine eigene Meinung', 'Nicht zu viele Details', 'Keine langen Zitate'],
-    memory: 'neutral kürzen',
-    quiz: {
-      question: 'Was ist bei einer Zusammenfassung tabu?',
-      options: ['Eigene Meinung', 'Präsens', 'Textsorte und Titel nennen'],
-      answer: 'Eigene Meinung',
-    },
-  },
-  {
-    id: 'textanalyse',
-    title: 'Textanalyse',
-    goal: 'Nicht-literarische Texte nach Aufbau, Sprache, Argumentation, Intention und Wirkung untersuchen.',
+    id: 'eroerterung',
+    title: 'Erörterung',
+    definition:
+      'Schriftliche Auseinandersetzung mit einem strittigen Thema anhand der Textbeilage, der eigenen Position und weiterer relevanter Perspektiven.',
+    goal: 'Ein Problem multiperspektivisch behandeln, Argumente abwägen und zu einer begründeten Einordnung kommen.',
     wordCount: '405-495 oder 540-660 Wörter',
-    tone: 'sachlich, analytisch, belegorientiert',
-    structure: ['Textdaten und Thema', 'Inhalt, Aufbau und Argumentation', 'Sprache, Stil, Zielgruppe und Intention', 'Analyseergebnis'],
-    watch: ['Nicht nur nacherzählen', 'Keine persönliche Meinung', 'Fachbegriffe verwenden', 'Mit Textstellen belegen'],
-    memory: 'sachlich untersuchen',
+    context: 'Kein von der Prüfungssituation abweichender Kontext.',
+    actions: ['Argumentation', 'Deskription', 'Evaluation', 'Explikation', 'Narration', 'Rekapitulation'],
+    structure: [
+      'Einleitung: Problemstellung aus der Textbeilage klar benennen',
+      'Hauptteil: These, Argumente, Belege, Einschränkungen und Gegenargumente verbinden',
+      'Schluss: Ergebnis einordnen und eventuell einen Ausblick geben',
+    ],
+    criteria: [
+      'Perspektiven der Beteiligten ausgewogen berücksichtigen',
+      'Argumente relevant, haltbar und klar miteinander verknüpfen',
+      'Gedanken aus der Textbeilage selbstständig fortführen, ergänzen oder widerlegen',
+      'Gegenargumente sichtbar einbeziehen',
+    ],
+    language: [
+      'sachlich und strukturiert argumentieren',
+      'Verben der Meinungsäußerung und meinungsabtönende Partikeln gezielt einsetzen',
+      'Konjunktionen und andere Verknüpfungsmittel sauber nutzen',
+    ],
+    boundary:
+      'Die Erörterung ist eine schulische Textsorte. Verwandte Formen können argumentativ ähnlich sein, brauchen aber einen konkreteren Anlass oder ein anderes Format.',
+    memory: 'ausgewogen abwägen',
     quiz: {
-      question: 'Welche Textsorte bleibt beim analytisch Feststellbaren?',
-      options: ['Textanalyse', 'Textinterpretation', 'Kommentar'],
-      answer: 'Textanalyse',
-    },
-  },
-  {
-    id: 'textinterpretation',
-    title: 'Textinterpretation',
-    goal: 'Literarische Texte deuten und die Deutung aus Inhalt, Sprache und Form ableiten.',
-    wordCount: '540-660 Wörter',
-    tone: 'deutend, textnah, fachsprachlich',
-    structure: ['Textdaten und Thema', 'Kurze Inhaltsangabe', 'Analyse von Sprache, Form und Motiven', 'Interpretationshypothese', 'Zentrales Ergebnis'],
-    watch: ['Nicht nur nacherzählen', 'Jede Deutung begründen', 'Fachbegriffe einsetzen', 'Zitate korrekt kennzeichnen'],
-    memory: 'literarisch deuten',
-    quiz: {
-      question: 'Was braucht jede gute Interpretation?',
-      options: ['Textbelege für die Deutung', 'Möglichst viele private Eindrücke', 'Nur eine lange Inhaltsangabe'],
-      answer: 'Textbelege für die Deutung',
-    },
-  },
-  {
-    id: 'leserbrief',
-    title: 'Leserbrief',
-    goal: 'Persönlich und sachlich auf einen veröffentlichten Beitrag reagieren.',
-    wordCount: '270-330 Wörter',
-    tone: 'persönlich, knapp, adressatenbezogen',
-    structure: ['Anrede', 'Bezug auf den Artikel', 'Eigene Meinung mit Argumenten', 'Forderung oder Appell', 'Grußformel'],
-    watch: ['Klarer Bezug zur Textbeilage', 'Nicht ausschweifen', 'Sachlich bleiben', 'Keine Beleidigungen'],
-    memory: 'persönlich reagieren',
-    quiz: {
-      question: 'An wen richtet sich ein Leserbrief typischerweise?',
-      options: ['Redaktion und Leserschaft', 'Nur an die Prueferin', 'An eine literarische Figur'],
-      answer: 'Redaktion und Leserschaft',
+      question: 'Was muss eine Erörterung unbedingt leisten?',
+      options: ['Mehrere Perspektiven abwägen', 'Nur die Textbeilage zusammenfassen', 'Eine Briefform verwenden'],
+      answer: 'Mehrere Perspektiven abwägen',
     },
   },
   {
     id: 'kommentar',
     title: 'Kommentar',
-    goal: 'Zu einem relevanten Thema pointiert Stellung nehmen und Meinungsbildung anregen.',
+    definition:
+      'Journalistische Textsorte, die zur Meinungsbildung einer interessierten Öffentlichkeit beiträgt.',
+    goal: 'Zu einem öffentlich diskutierten Thema klar Stellung nehmen, Argumente zuspitzen und Leserinnen und Leser zum Nachdenken bringen.',
     wordCount: '270-330, 405-495 oder 540-660 Wörter',
-    tone: 'journalistisch, pointiert, klar positioniert',
-    structure: ['Pointierte Ueberschrift', 'Aktueller Einstieg', 'Position mit Argumenten und Beispielen', 'Gegenargumente', 'Pointe oder Appell'],
-    watch: ['Eigene Meinung klar zeigen', 'Nicht wie eine Erörterung schreiben', 'Kein reines Zusammenfassen', 'Ich eher sparsam verwenden'],
-    memory: 'pointiert Meinung bilden',
+    context: 'Situativer Kontext erforderlich, zum Beispiel Zeitung, Rolle oder Veröffentlichungssituation.',
+    actions: ['Argumentation', 'Deskription', 'Evaluation', 'Explikation', 'Narration', 'Rekapitulation'],
+    structure: [
+      'Einleitung: Problemstellung aus der Textbeilage knapp darstellen',
+      'Hauptteil: eigene These mit Belegen, Beispielen und möglichen Einschränkungen entwickeln',
+      'Schluss: klare Positionierung oder pointierte Schlussfolgerung',
+    ],
+    criteria: [
+      'Sachverhalt nur so ausführlich darstellen, wie es für das Schreibziel nötig ist',
+      'Eigene Position eindeutig formulieren',
+      'Argumentation auf Thema und Öffentlichkeit beziehen',
+      'Thesen und Argumente aus der Textbeilage eigenständig weiterführen',
+    ],
+    language: [
+      'journalistisch, verdichtet und pointiert schreiben',
+      'rhetorische Mittel wie Fragen, Ellipsen oder Kurzsätze gezielt einsetzen',
+      'in der Regel unpersönlich formulieren und „ich“ sparsam verwenden',
+    ],
+    boundary:
+      'Der Kommentar ist komplexer und pointierter als ein typischer Leserbrief und unterscheidet sich von der Erörterung durch stärkere öffentliche Positionierung und Stilverdichtung.',
+    memory: 'pointiert positionieren',
     quiz: {
-      question: 'Was unterscheidet den Kommentar besonders?',
-      options: ['Pointierte Haltung', 'Vollstaendige Neutralitaet', 'Keine Ueberschrift'],
-      answer: 'Pointierte Haltung',
+      question: 'Was ist für den Kommentar besonders typisch?',
+      options: ['Klare Position mit Pointierung', 'Völlige Neutralität', 'Briefkopf und Schlussformel'],
+      answer: 'Klare Position mit Pointierung',
     },
   },
   {
-    id: 'eroerterung',
-    title: 'Erörterung',
-    goal: 'Ein strittiges Thema mehrperspektivisch behandeln und begründet abwägen.',
-    wordCount: '405-495 oder 540-660 Wörter',
-    tone: 'sachlich, strukturiert, argumentierend',
-    structure: ['Thema oder Problemfrage', 'Pro- und Contra-Argumente', 'Eigene Position', 'Abwägung und Ausblick'],
-    watch: ['Argumente klar strukturieren', 'Gegenpositionen einbauen', 'Textbeilage verwenden', 'Meinung begründen'],
-    memory: 'ausgewogen diskutieren',
+    id: 'leserbrief',
+    title: 'Leserbrief',
+    definition:
+      'Kompakte Darstellung persönlicher Meinung in einem Medium als Reaktion auf veröffentlichte Berichte, Aussagen oder Themen.',
+    goal: 'Zustimmen, widersprechen, ergänzen oder korrigieren und dabei direkt auf die Textbeilage reagieren.',
+    wordCount: '270-330 Wörter',
+    context: 'Situativer Kontext erforderlich; der Brief reagiert auf ein Medium oder eine konkrete Veröffentlichung.',
+    actions: ['Argumentation', 'Deskription', 'Evaluation', 'Explikation', 'Narration', 'Rekapitulation'],
+    structure: [
+      'Eröffnungsformel und direkte Adressierung, zum Beispiel Redaktion, Verfasser/in oder Leserschaft',
+      'Einleitung: Schreibanlass mit Textsorte, Titel, Autor/in, Medium und Erscheinungsdatum nennen',
+      'Hauptteil: eigene Position schlüssig als Zustimmung, Ablehnung, Ergänzung oder Widerspruch ausführen',
+      'Schluss: Appell, Bewertung, Fazit oder Ausblick plus Schlussformel',
+    ],
+    criteria: [
+      'Inhaltlich explizit auf die Textbeilage reagieren',
+      'Briefform und Adressierung beachten; ein Briefkopf ist bei der SRDP nicht notwendig',
+      'Eigene Gedanken verdichtet und nachvollziehbar führen',
+      'Keine Beschimpfungen oder Beleidigungen verwenden',
+    ],
+    language: [
+      'kompakt und adressatenbezogen schreiben',
+      'Stil kann sachlich, subjektiv kritisch, polemisch oder provozierend sein',
+      'trotz persönlicher Meinung argumentativ nachvollziehbar bleiben',
+    ],
+    boundary:
+      'Ein offener Brief richtet sich breiter an die Öffentlichkeit und muss nicht auf die Berichterstattung eines konkreten Mediums reagieren.',
+    memory: 'gezielt reagieren',
     quiz: {
-      question: 'Was gehört unbedingt in eine Erörterung?',
-      options: ['Begründete Argumente', 'Nur ein Appell', 'Nur Textdaten ohne Position'],
-      answer: 'Begründete Argumente',
+      question: 'Was ist im Leserbrief laut Katalog zentral?',
+      options: ['Explizite Reaktion auf die Textbeilage', 'Keine eigene Meinung', 'Nur literarische Deutung'],
+      answer: 'Explizite Reaktion auf die Textbeilage',
     },
   },
   {
     id: 'meinungsrede',
     title: 'Meinungsrede',
-    goal: 'Ein Publikum mit Argumenten und rhetorischen Mitteln von einer Position überzeugen.',
+    definition:
+      'Druckfassung einer Rede, die ein bestimmtes Publikum von der eigenen Position zu einem aktuellen Thema oder Problem überzeugen soll.',
+    goal: 'Ein Publikum direkt ansprechen, argumentativ überzeugen und durch Rhetorik Aufmerksamkeit steuern.',
     wordCount: '405-495 oder 540-660 Wörter',
-    tone: 'wirkungsvoll, direkt, redeartig',
-    structure: ['Anrede', 'Anlass und Aufmerksamkeit', 'Position, Argumente und Beispiele', 'Gegenargumente', 'Appell und starker Schlusssatz'],
-    watch: ['Publikum direkt ansprechen', 'Rhetorische Fragen nutzen', 'Klarer Standpunkt', 'Nicht wie normale Erörterung schreiben'],
+    context: 'Situativer Kontext erforderlich; Publikum, Anlass und Rolle müssen erkennbar sein.',
+    actions: ['Argumentation', 'Deskription', 'Explikation', 'Narration', 'Rekapitulation'],
+    structure: [
+      'Einstieg: Anrede, aktueller Anlass, überraschende Mitteilung, Zitat oder eigene Betroffenheit',
+      'Hauptteil: Argumente schlüssig reihen, steigern oder dialektisch entwickeln',
+      'Schluss: Zusammenfassung, Ausblick oder Appell mit starker Schlusswirkung',
+    ],
+    criteria: [
+      'Publikum direkt adressieren und überzeugen',
+      'Anlassfall und Bezug zur Textbeilage darlegen',
+      'Eigene Position klar formulieren',
+      'Argumente durch konkrete Beispiele, überprüfbare Daten und Fakten stützen',
+    ],
+    language: [
+      'rhetorische Mittel gezielt einsetzen',
+      'einfache, gut sprechbare Sätze verwenden',
+      'Redundanzen bewusst nutzen, weil die Rede mündlich wirken soll',
+    ],
+    boundary:
+      'Die Meinungsrede informiert und erklärt nur so weit, wie es die Argumentation stützt. Ihre Besonderheit ist die Verbindung von Argumentation, Rhetorik und Publikumsbezug.',
     memory: 'Publikum überzeugen',
     quiz: {
-      question: 'Welches Mittel passt besonders zur Meinungsrede?',
-      options: ['Direkte Publikumsansprache', 'Neutraler Berichtstil', 'Keine Schlusswirkung'],
+      question: 'Was darf in einer Meinungsrede nicht fehlen?',
+      options: ['Direkte Publikumsansprache', 'Nur neutrale Analyse', 'Keine Schlusswirkung'],
       answer: 'Direkte Publikumsansprache',
     },
+  },
+  {
+    id: 'textanalyse',
+    title: 'Textanalyse',
+    definition:
+      'Sachliche Beschreibung eines nicht-fiktionalen Textes nach Analyse sprachlicher, formaler und inhaltlicher Aspekte.',
+    goal: 'Bestimmte Aspekte eines Sachtextes herausarbeiten und anhand von Textbelegen nachvollziehbar darstellen.',
+    wordCount: '405-495 oder 540-660 Wörter',
+    context: 'Kein von der Prüfungssituation abweichender Kontext.',
+    actions: ['Deskription', 'Explikation', 'Narration', 'Rekapitulation'],
+    structure: [
+      'Einleitung: Basisinformationen nennen, also Textsorte, Titel, Autor/in, Medium und Erscheinungsdatum',
+      'Hauptteil: formale, syntaktische, sprachliche und inhaltliche Elemente analysieren',
+      'Schluss: Analyseergebnisse zusammenfassen und gegebenenfalls Textqualitäten oder Textfunktionen einschätzen',
+    ],
+    criteria: [
+      'Nur analysieren, nicht interpretieren',
+      'Genau mit Textstellen, Benennungen und Zitaten umgehen',
+      'Aspekte wie Intention, sprachliche Gestaltung oder Argumentationsstruktur herausarbeiten',
+      'Schlussfolgerungen auf belegte Analyseergebnisse stützen',
+    ],
+    language: [
+      'sachlich, abstrahierend und informativ-darlegend formulieren',
+      'Fachterminologie korrekt und inhaltlich passend verwenden',
+      'persönliche Geschmacksurteile vermeiden',
+    ],
+    boundary:
+      'Anders als die Textinterpretation bleibt die Textanalyse auf der Ebene des analytisch Feststellbaren.',
+    memory: 'sachlich feststellen',
+    quiz: {
+      question: 'Welche Grenze gilt für die Textanalyse?',
+      options: ['Keine Interpretation', 'Immer Briefform', 'Immer eigene Meinung'],
+      answer: 'Keine Interpretation',
+    },
+  },
+  {
+    id: 'textinterpretation',
+    title: 'Textinterpretation',
+    definition:
+      'Deutung eines literarischen Textes auf Grundlage der Untersuchung von Textmerkmalen.',
+    goal: 'Bedeutungsebenen erschließen und zeigen, wie Form, Sprache, Inhalt und Wirkung zusammenhängen.',
+    wordCount: '540-660 Wörter',
+    context: 'Kein von der Prüfungssituation abweichender Kontext erforderlich.',
+    actions: ['Argumentation', 'Deskription', 'Explikation', 'Narration', 'Rekapitulation'],
+    structure: [
+      'Einleitung: Textsorte, Titel, Autor/in und Erscheinungs- oder Entstehungsjahr nennen',
+      'Hauptteil: Thema oder Handlung nachvollziehbar zusammenfassen',
+      'Hauptteil: relevante formale, syntaktische und inhaltliche Elemente analysieren',
+      'Hauptteil: Interpretationshypothese entwickeln oder überprüfen und Symbolgehalt erklären',
+      'Schluss: Interpretationsergebnisse knapp zusammenfassen',
+    ],
+    criteria: [
+      'Bedeutung oder mehrere Bedeutungsebenen erschließen',
+      'Interpretation auf Analyseergebnisse stützen',
+      'Historische, kulturelle, biografische oder intertextuelle Kontexte nur passend einbeziehen',
+      'Analyseaspekte leserfreundlich in den Gesamttext einbinden',
+    ],
+    language: [
+      'Fachtermini korrekt und einheitlich verwenden',
+      'eigenständiges, vom Ausgangstext gelöstes Vokabular nutzen',
+      'direkte und indirekte Zitate klar kennzeichnen',
+    ],
+    boundary:
+      'Die Textinterpretation setzt dort fort, wo die Textanalyse endet: Sie nutzt Analyse, um literarische Bedeutung zu erschließen.',
+    memory: 'literarisch deuten',
+    quiz: {
+      question: 'Worauf muss eine Interpretation aufbauen?',
+      options: ['Auf Analyseergebnissen', 'Auf reiner Privatmeinung', 'Auf einer Briefform'],
+      answer: 'Auf Analyseergebnissen',
+    },
+  },
+  {
+    id: 'zusammenfassung',
+    title: 'Zusammenfassung',
+    definition:
+      'Komprimierung einer oder mehrerer Textbeilagen zur Wiedergabe relevanter Informationen und der logisch-sachlichen Struktur.',
+    goal: 'Kernaussagen in eigenen Worten so wiedergeben, dass der Text auch ohne Kenntnis der Vorlage verständlich ist.',
+    wordCount: '270-330 Wörter',
+    context: 'Situativer Kontext erforderlich.',
+    actions: ['Deskription', 'Narration', 'Rekapitulation'],
+    structure: [
+      'Einleitung: Textsorte, Titel, Autor/in, Quelle oder Medium, Erscheinungsort und -datum nennen',
+      'Einleitung: Thema der Textbeilage darstellen',
+      'Hauptteil: Kernaussagen strukturiert und logisch nachvollziehbar wiedergeben',
+    ],
+    criteria: [
+      'Text sinngemäß und reduziert rekonstruieren',
+      'Keine Interpretation und keine eigene Stellungnahme einbauen',
+      'Inhaltsgetreu und eigenständig verständlich bleiben',
+      'Direkte Zitate nur verwenden, wenn sie für den komprimierten Inhalt besonders wichtig sind',
+    ],
+    language: [
+      'sachlich und eigenständig formulieren',
+      'Fachsprache übernehmen, wenn sie nötig ist, sonst Distanz zum Stil der Vorlage halten',
+      'Kohärenz trotz Verdichtung sichern und Mittel der Redewiedergabe variieren',
+    ],
+    boundary:
+      'Die Zusammenfassung enthält nie Bewertung oder eigene Stellungnahme, sondern beschränkt sich auf die komprimierte Wiedergabe der Quelle.',
+    memory: 'neutral komprimieren',
+    quiz: {
+      question: 'Was ist bei einer Zusammenfassung ausgeschlossen?',
+      options: ['Eigene Stellungnahme', 'Basisinformationen', 'Kernaussagen'],
+      answer: 'Eigene Stellungnahme',
+    },
+  },
+]
+
+const writingActions = [
+  {
+    title: 'Deskription',
+    copy: 'neutrale Beschreibung von Zuständen, Personen, Orten, Gegenständen oder Ereignissen',
+  },
+  {
+    title: 'Narration',
+    copy: 'Darstellung von Ereignissen oder Entwicklungen in zeitlicher und teils ursächlicher Ordnung',
+  },
+  {
+    title: 'Explikation',
+    copy: 'Erklärung von Zusammenhängen, etwa Ursache-Wirkung, Zweck-Mittel oder Ganzes-Teil',
+  },
+  {
+    title: 'Argumentation',
+    copy: 'Begründung einer Position durch These, Argumente, Einwände, Belege und Schlussfolgerung',
+  },
+  {
+    title: 'Rekapitulation',
+    copy: 'knappe Wiederaufnahme relevanter Informationen aus Textbeilagen oder bisherigen Gedankengängen',
+  },
+  {
+    title: 'Evaluation',
+    copy: 'bewertende Einordnung nach nachvollziehbaren Kriterien, besonders bei argumentativen Textsorten',
   },
 ]
 
@@ -210,10 +377,11 @@ hydrateProgress()
   <main class="matura-page">
     <header class="matura-hero">
       <div>
-        <p class="eyebrow">HTL-/BHS-Deutschmatura</p>
+        <p class="eyebrow">SRDP Deutsch · offizieller Textsortenkatalog</p>
         <h1>Interaktiver Lernpfad für die 7 Textsorten</h1>
         <p class="lead">
-          Trainiere Ziel, Aufbau, Stolperfallen und Wortumfang. Dein Fortschritt bleibt lokal im Browser gespeichert.
+          Trainiere die offiziellen Definitionen, Schreibhandlungen, Bewertungskriterien und Wortumfänge aus dem
+          Textsortenkatalog. Dein Fortschritt bleibt lokal im Browser gespeichert.
         </p>
       </div>
       <aside class="progress-panel">
@@ -226,9 +394,21 @@ hydrateProgress()
       </aside>
     </header>
 
+    <section class="official-note" aria-labelledby="official-title">
+      <div>
+        <p class="eyebrow">Stand September 2020</p>
+        <h2 id="official-title">Was der Katalog wirklich prüfungsrelevant macht</h2>
+      </div>
+      <p>
+        Textsorten sind keine starren Vorlagen, sondern wiedererkennbare Muster für konkrete Kommunikationssituationen.
+        Für die SRDP werden sie über Ziel, Kontext, Schreibhandlungen, Struktur, Sprache und Umfang beschrieben.
+      </p>
+    </section>
+
     <section class="exam-rule">
-      <strong>Pruefungsregel:</strong>
-      Zwei Texte, insgesamt 900 Wörter +/- 10 %. Spezifische Werkkenntnis oder ein Literaturkanon wird nicht vorausgesetzt.
+      <strong>Prüfungsregel:</strong>
+      Zwei Texte, insgesamt 900 Wörter +/- 10 %. Der Textsortenkatalog nennt genau diese sieben Textsorten; spezifische
+      Werkkenntnis oder ein Literaturkanon wird nicht vorausgesetzt.
     </section>
 
     <section class="learning-layout">
@@ -260,6 +440,11 @@ hydrateProgress()
           </button>
         </div>
 
+        <section class="definition-panel">
+          <h3>Offizielle Definition kompakt</h3>
+          <p>{{ selected.definition }}</p>
+        </section>
+
         <div class="focus-grid">
           <section>
             <h3>Ziel</h3>
@@ -270,23 +455,43 @@ hydrateProgress()
             <p>{{ selected.wordCount }}</p>
           </section>
           <section>
-            <h3>Stil</h3>
-            <p>{{ selected.tone }}</p>
+            <h3>Situativer Kontext</h3>
+            <p>{{ selected.context }}</p>
           </section>
         </div>
 
+        <section class="actions-panel">
+          <h3>Wichtige Schreibhandlungen</h3>
+          <div class="tag-row">
+            <span v-for="action in selected.actions" :key="action">{{ action }}</span>
+          </div>
+        </section>
+
         <div class="study-grid">
           <section>
-            <h3>Aufbau</h3>
+            <h3>Gliederung und Struktur</h3>
             <ol>
               <li v-for="step in selected.structure" :key="step">{{ step }}</li>
             </ol>
           </section>
           <section>
-            <h3>Aufpassen</h3>
+            <h3>Bewertungskriterien</h3>
             <ul>
-              <li v-for="warning in selected.watch" :key="warning">{{ warning }}</li>
+              <li v-for="criterion in selected.criteria" :key="criterion">{{ criterion }}</li>
             </ul>
+          </section>
+        </div>
+
+        <div class="study-grid">
+          <section>
+            <h3>Sprache</h3>
+            <ul>
+              <li v-for="item in selected.language" :key="item">{{ item }}</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Abgrenzung</h3>
+            <p>{{ selected.boundary }}</p>
           </section>
         </div>
 
@@ -309,9 +514,21 @@ hydrateProgress()
             </button>
           </div>
           <p v-if="quizState === 'correct'" class="feedback good">Richtig. Diese Station ist erledigt.</p>
-          <p v-else-if="quizState === 'wrong'" class="feedback bad">Noch einmal pruefen: Die richtige Antwort ist markiert.</p>
+          <p v-else-if="quizState === 'wrong'" class="feedback bad">
+            Noch einmal prüfen: Die richtige Antwort ist markiert.
+          </p>
         </section>
       </article>
+    </section>
+
+    <section class="actions-reference" aria-labelledby="actions-title">
+      <h2 id="actions-title">Schreibhandlungen als Bausteine</h2>
+      <div class="action-grid">
+        <article v-for="action in writingActions" :key="action.title">
+          <strong>{{ action.title }}</strong>
+          <p>{{ action.copy }}</p>
+        </article>
+      </div>
     </section>
 
     <section class="tools-panel">
@@ -334,13 +551,25 @@ hydrateProgress()
     </section>
 
     <footer class="source-row">
-      <a href="https://www.bmb.gv.at/Themen/schule/schulpraxis/zentralmatura/srdp_ahs/klausurpruefungen/lf_sa_ms/dt_vgs.html" target="_blank" rel="noreferrer">
+      <a
+        href="https://www.bmb.gv.at/Themen/schule/schulpraxis/zentralmatura/srdp_ahs/klausurpruefungen/lf_sa_ms/dt_vgs.html"
+        target="_blank"
+        rel="noreferrer"
+      >
         BMB/BMBWF
       </a>
-      <a href="https://www.matura.gv.at/index.php?eID=dumpFile&f=4525&t=f&token=950c7f2b86f0ebc3459c5f0aa0e04013ab99c572" target="_blank" rel="noreferrer">
+      <a
+        href="https://www.matura.gv.at/index.php?eID=dumpFile&f=4525&t=f&token=950c7f2b86f0ebc3459c5f0aa0e04013ab99c572"
+        target="_blank"
+        rel="noreferrer"
+      >
         Textsortenkatalog
       </a>
-      <a href="https://www.matura.gv.at/index.php?eID=dumpFile&f=4841&t=f&token=c757edec822756f93c143afc9f25741ddee32048" target="_blank" rel="noreferrer">
+      <a
+        href="https://www.matura.gv.at/index.php?eID=dumpFile&f=4841&t=f&token=c757edec822756f93c143afc9f25741ddee32048"
+        target="_blank"
+        rel="noreferrer"
+      >
         Beurteilungsraster
       </a>
     </footer>
@@ -363,17 +592,33 @@ hydrateProgress()
 }
 
 .matura-hero h1 {
-  max-width: 20ch;
+  max-width: 22ch;
 }
 
 .progress-panel,
+.official-note,
 .exam-rule,
 .path-panel,
 .detail-panel,
-.tools-panel {
+.tools-panel,
+.actions-reference {
   background: linear-gradient(160deg, rgba(26, 35, 59, 0.75), rgba(12, 17, 30, 0.85));
   border: 1px solid rgba(120, 148, 214, 0.2);
   border-radius: 1rem;
+}
+
+.official-note {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, rgba(94, 234, 212, 0.1), rgba(26, 35, 59, 0.82));
+}
+
+.official-note p:last-child {
+  color: #c4d0e8;
 }
 
 .progress-panel {
@@ -475,8 +720,25 @@ hydrateProgress()
   flex-wrap: wrap;
 }
 
+.definition-panel,
+.actions-panel,
+.focus-grid section,
+.study-grid section,
+.quiz-panel,
+.action-grid article {
+  border: 1px solid rgba(120, 148, 214, 0.2);
+  border-radius: 0.85rem;
+  background: rgba(16, 23, 40, 0.58);
+  padding: 0.85rem;
+}
+
+.definition-panel {
+  margin-top: 1rem;
+}
+
 .focus-grid,
-.study-grid {
+.study-grid,
+.action-grid {
   display: grid;
   gap: 0.8rem;
   margin-top: 1rem;
@@ -490,18 +752,15 @@ hydrateProgress()
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.focus-grid section,
-.study-grid section,
-.quiz-panel {
-  border: 1px solid rgba(120, 148, 214, 0.2);
-  border-radius: 0.85rem;
-  background: rgba(16, 23, 40, 0.58);
-  padding: 0.85rem;
+.detail-panel h3,
+.tools-panel h2,
+.actions-reference h2 {
+  margin-bottom: 0.45rem;
 }
 
-.detail-panel h3,
-.tools-panel h2 {
-  margin-bottom: 0.45rem;
+.detail-panel p,
+.action-grid p {
+  color: #c4d0e8;
 }
 
 .detail-panel ol,
@@ -513,6 +772,26 @@ hydrateProgress()
 
 .detail-panel li + li {
   margin-top: 0.35rem;
+}
+
+.actions-panel {
+  margin-top: 1rem;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.tag-row span {
+  border: 1px solid rgba(94, 234, 212, 0.25);
+  border-radius: 999px;
+  background: rgba(94, 234, 212, 0.1);
+  color: #d9fff8;
+  padding: 0.32rem 0.58rem;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
 .quiz-panel {
@@ -558,9 +837,20 @@ hydrateProgress()
   color: #fecdd3;
 }
 
+.actions-reference,
 .tools-panel {
   margin-top: 1rem;
   padding: 1rem;
+}
+
+.action-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.action-grid strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #a7f3d0;
 }
 
 .tools-panel label {
@@ -619,9 +909,11 @@ hydrateProgress()
 
 @media (max-width: 900px) {
   .matura-hero,
+  .official-note,
   .learning-layout,
   .focus-grid,
-  .study-grid {
+  .study-grid,
+  .action-grid {
     grid-template-columns: 1fr;
   }
 }
