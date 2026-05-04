@@ -7,12 +7,6 @@
   NODE_VERSION = "22"
 
 [[redirects]]
-  from = "/"
-  to = "/vocab"
-  status = 301
-  conditions = { Host = ["vocab.your-domain.com"] }
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
