@@ -23,15 +23,15 @@ const textTypes: TextType[] = [
   {
     id: 'zusammenfassung',
     title: 'Zusammenfassung',
-    goal: 'Ausgangstexte neutral, gekuerzt und sachlich wiedergeben.',
-    wordCount: '270-330 Woerter',
-    tone: 'neutral, sachlich, Praesens',
+    goal: 'Ausgangstexte neutral, gekürzt und sachlich wiedergeben.',
+    wordCount: '270-330 Wörter',
+    tone: 'neutral, sachlich, Präsens',
     structure: ['Einleitung mit Textdaten', 'Hauptaussagen logisch ordnen', 'Kein eigener Kommentar'],
     watch: ['Keine Bewertung', 'Keine eigene Meinung', 'Nicht zu viele Details', 'Keine langen Zitate'],
-    memory: 'neutral kuerzen',
+    memory: 'neutral kürzen',
     quiz: {
       question: 'Was ist bei einer Zusammenfassung tabu?',
-      options: ['Eigene Meinung', 'Praesens', 'Textsorte und Titel nennen'],
+      options: ['Eigene Meinung', 'Präsens', 'Textsorte und Titel nennen'],
       answer: 'Eigene Meinung',
     },
   },
@@ -39,10 +39,10 @@ const textTypes: TextType[] = [
     id: 'textanalyse',
     title: 'Textanalyse',
     goal: 'Nicht-literarische Texte nach Aufbau, Sprache, Argumentation, Intention und Wirkung untersuchen.',
-    wordCount: '405-495 oder 540-660 Woerter',
+    wordCount: '405-495 oder 540-660 Wörter',
     tone: 'sachlich, analytisch, belegorientiert',
     structure: ['Textdaten und Thema', 'Inhalt, Aufbau und Argumentation', 'Sprache, Stil, Zielgruppe und Intention', 'Analyseergebnis'],
-    watch: ['Nicht nur nacherzaehlen', 'Keine persoenliche Meinung', 'Fachbegriffe verwenden', 'Mit Textstellen belegen'],
+    watch: ['Nicht nur nacherzählen', 'Keine persönliche Meinung', 'Fachbegriffe verwenden', 'Mit Textstellen belegen'],
     memory: 'sachlich untersuchen',
     quiz: {
       question: 'Welche Textsorte bleibt beim analytisch Feststellbaren?',
@@ -54,26 +54,26 @@ const textTypes: TextType[] = [
     id: 'textinterpretation',
     title: 'Textinterpretation',
     goal: 'Literarische Texte deuten und die Deutung aus Inhalt, Sprache und Form ableiten.',
-    wordCount: '540-660 Woerter',
+    wordCount: '540-660 Wörter',
     tone: 'deutend, textnah, fachsprachlich',
     structure: ['Textdaten und Thema', 'Kurze Inhaltsangabe', 'Analyse von Sprache, Form und Motiven', 'Interpretationshypothese', 'Zentrales Ergebnis'],
-    watch: ['Nicht nur nacherzaehlen', 'Jede Deutung begruenden', 'Fachbegriffe einsetzen', 'Zitate korrekt kennzeichnen'],
+    watch: ['Nicht nur nacherzählen', 'Jede Deutung begründen', 'Fachbegriffe einsetzen', 'Zitate korrekt kennzeichnen'],
     memory: 'literarisch deuten',
     quiz: {
       question: 'Was braucht jede gute Interpretation?',
-      options: ['Textbelege fuer die Deutung', 'Moeglichst viele private Eindruecke', 'Nur eine lange Inhaltsangabe'],
-      answer: 'Textbelege fuer die Deutung',
+      options: ['Textbelege für die Deutung', 'Möglichst viele private Eindrücke', 'Nur eine lange Inhaltsangabe'],
+      answer: 'Textbelege für die Deutung',
     },
   },
   {
     id: 'leserbrief',
     title: 'Leserbrief',
-    goal: 'Persoenlich und sachlich auf einen veroeffentlichten Beitrag reagieren.',
-    wordCount: '270-330 Woerter',
-    tone: 'persoenlich, knapp, adressatenbezogen',
-    structure: ['Anrede', 'Bezug auf den Artikel', 'Eigene Meinung mit Argumenten', 'Forderung oder Appell', 'Grussformel'],
+    goal: 'Persönlich und sachlich auf einen veröffentlichten Beitrag reagieren.',
+    wordCount: '270-330 Wörter',
+    tone: 'persönlich, knapp, adressatenbezogen',
+    structure: ['Anrede', 'Bezug auf den Artikel', 'Eigene Meinung mit Argumenten', 'Forderung oder Appell', 'Grußformel'],
     watch: ['Klarer Bezug zur Textbeilage', 'Nicht ausschweifen', 'Sachlich bleiben', 'Keine Beleidigungen'],
-    memory: 'persoenlich reagieren',
+    memory: 'persönlich reagieren',
     quiz: {
       question: 'An wen richtet sich ein Leserbrief typischerweise?',
       options: ['Redaktion und Leserschaft', 'Nur an die Prueferin', 'An eine literarische Figur'],
@@ -84,7 +84,7 @@ const textTypes: TextType[] = [
     id: 'kommentar',
     title: 'Kommentar',
     goal: 'Zu einem relevanten Thema pointiert Stellung nehmen und Meinungsbildung anregen.',
-    wordCount: '270-330, 405-495 oder 540-660 Woerter',
+    wordCount: '270-330, 405-495 oder 540-660 Wörter',
     tone: 'journalistisch, pointiert, klar positioniert',
     structure: ['Pointierte Ueberschrift', 'Aktueller Einstieg', 'Position mit Argumenten und Beispielen', 'Gegenargumente', 'Pointe oder Appell'],
     watch: ['Eigene Meinung klar zeigen', 'Nicht wie eine Erörterung schreiben', 'Kein reines Zusammenfassen', 'Ich eher sparsam verwenden'],
@@ -97,28 +97,28 @@ const textTypes: TextType[] = [
   },
   {
     id: 'eroerterung',
-    title: 'Eroerterung',
-    goal: 'Ein strittiges Thema mehrperspektivisch behandeln und begruendet abwaegen.',
-    wordCount: '405-495 oder 540-660 Woerter',
+    title: 'Erörterung',
+    goal: 'Ein strittiges Thema mehrperspektivisch behandeln und begründet abwägen.',
+    wordCount: '405-495 oder 540-660 Wörter',
     tone: 'sachlich, strukturiert, argumentierend',
-    structure: ['Thema oder Problemfrage', 'Pro- und Contra-Argumente', 'Eigene Position', 'Abwaegung und Ausblick'],
-    watch: ['Argumente klar strukturieren', 'Gegenpositionen einbauen', 'Textbeilage verwenden', 'Meinung begruenden'],
+    structure: ['Thema oder Problemfrage', 'Pro- und Contra-Argumente', 'Eigene Position', 'Abwägung und Ausblick'],
+    watch: ['Argumente klar strukturieren', 'Gegenpositionen einbauen', 'Textbeilage verwenden', 'Meinung begründen'],
     memory: 'ausgewogen diskutieren',
     quiz: {
-      question: 'Was gehoert unbedingt in eine Eroerterung?',
-      options: ['Begruendete Argumente', 'Nur ein Appell', 'Nur Textdaten ohne Position'],
-      answer: 'Begruendete Argumente',
+      question: 'Was gehört unbedingt in eine Erörterung?',
+      options: ['Begründete Argumente', 'Nur ein Appell', 'Nur Textdaten ohne Position'],
+      answer: 'Begründete Argumente',
     },
   },
   {
     id: 'meinungsrede',
     title: 'Meinungsrede',
-    goal: 'Ein Publikum mit Argumenten und rhetorischen Mitteln von einer Position ueberzeugen.',
-    wordCount: '405-495 oder 540-660 Woerter',
+    goal: 'Ein Publikum mit Argumenten und rhetorischen Mitteln von einer Position überzeugen.',
+    wordCount: '405-495 oder 540-660 Wörter',
     tone: 'wirkungsvoll, direkt, redeartig',
     structure: ['Anrede', 'Anlass und Aufmerksamkeit', 'Position, Argumente und Beispiele', 'Gegenargumente', 'Appell und starker Schlusssatz'],
-    watch: ['Publikum direkt ansprechen', 'Rhetorische Fragen nutzen', 'Klarer Standpunkt', 'Nicht wie normale Eroerterung schreiben'],
-    memory: 'Publikum ueberzeugen',
+    watch: ['Publikum direkt ansprechen', 'Rhetorische Fragen nutzen', 'Klarer Standpunkt', 'Nicht wie normale Erörterung schreiben'],
+    memory: 'Publikum überzeugen',
     quiz: {
       question: 'Welches Mittel passt besonders zur Meinungsrede?',
       options: ['Direkte Publikumsansprache', 'Neutraler Berichtstil', 'Keine Schlusswirkung'],
@@ -211,7 +211,7 @@ hydrateProgress()
     <header class="matura-hero">
       <div>
         <p class="eyebrow">HTL-/BHS-Deutschmatura</p>
-        <h1>Interaktiver Lernpfad fuer die 7 Textsorten</h1>
+        <h1>Interaktiver Lernpfad für die 7 Textsorten</h1>
         <p class="lead">
           Trainiere Ziel, Aufbau, Stolperfallen und Wortumfang. Dein Fortschritt bleibt lokal im Browser gespeichert.
         </p>
@@ -222,13 +222,13 @@ hydrateProgress()
         <div class="progress-track" aria-hidden="true">
           <span :style="{ width: `${progressPercent}%` }"></span>
         </div>
-        <button class="btn soft" type="button" @click="resetProgress">Fortschritt zuruecksetzen</button>
+        <button class="btn soft" type="button" @click="resetProgress">Fortschritt zurücksetzen</button>
       </aside>
     </header>
 
     <section class="exam-rule">
       <strong>Pruefungsregel:</strong>
-      Zwei Texte, insgesamt 900 Woerter +/- 10 %. Spezifische Werkkenntnis oder ein Literaturkanon wird nicht vorausgesetzt.
+      Zwei Texte, insgesamt 900 Wörter +/- 10 %. Spezifische Werkkenntnis oder ein Literaturkanon wird nicht vorausgesetzt.
     </section>
 
     <section class="learning-layout">
@@ -320,7 +320,7 @@ hydrateProgress()
         <p>Nutze ihn, wenn du einen der zwei Maturatexte planst.</p>
       </div>
       <label>
-        Geplante Wortzahl fuer Text 1
+        Geplante Wortzahl für Text 1
         <input v-model.number="wordTarget" type="number" min="0" max="990" step="10" />
       </label>
       <label>
@@ -328,9 +328,9 @@ hydrateProgress()
         <input v-model.number="plannedTexts" type="number" min="1" max="2" />
       </label>
       <p v-if="plannedTexts === 2" class="word-result">
-        Fuer Text 2 bleiben ca. {{ remainingWords.min }}-{{ remainingWords.max }} Woerter im erlaubten Gesamtbereich.
+        Für Text 2 bleiben ca. {{ remainingWords.min }}-{{ remainingWords.max }} Wörter im erlaubten Gesamtbereich.
       </p>
-      <p v-else class="word-result">Gesamtbereich: 810-990 Woerter.</p>
+      <p v-else class="word-result">Gesamtbereich: 810-990 Wörter.</p>
     </section>
 
     <footer class="source-row">
