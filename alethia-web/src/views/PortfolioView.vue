@@ -7,7 +7,8 @@
           <h1>{{ copy.heroTitle }}</h1>
           <p class="lead">{{ copy.heroLead }}</p>
           <div class="cta-group">
-            <a class="btn primary" href="#experience">{{ copy.viewExperience }}</a>
+            <a class="btn primary" href="#projects">{{ copy.viewProjects }}</a>
+            <a class="btn ghost" href="#experience">{{ copy.viewExperience }}</a>
             <a class="btn ghost" href="#contact">{{ copy.getInTouch }}</a>
           </div>
         </div>
@@ -35,6 +36,25 @@
           <h3>{{ skill.title }}</h3>
           <ul>
             <li v-for="item in skill.items" :key="item">{{ item }}</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="projects">
+      <h2>{{ copy.projectsTitle }}</h2>
+      <p>{{ copy.projectsIntro }}</p>
+      <div class="grid diploma-grid">
+        <article v-for="project in copy.projects" :key="project.title" class="card project-card diploma-card">
+          <a class="project-company" :href="project.href" target="_blank" rel="noreferrer">
+            <img class="company-logo" :src="project.logo" :alt="project.logoAlt" />
+            <span class="project-tag">{{ project.category }}</span>
+          </a>
+          <h3>{{ project.title }}</h3>
+          <p>{{ project.detail }}</p>
+          <p class="project-outcome">{{ project.outcome }}</p>
+          <ul class="project-points">
+            <li v-for="point in project.points" :key="point">{{ point }}</li>
           </ul>
         </article>
       </div>
@@ -139,13 +159,14 @@ const translations = {
     heroTitle: "Hi, I'm Martin Preinsberger - Student at HTL Neufelden.",
     heroLead:
       'I am a Business Informatics student with hands-on internship experience in edge computing, production planning, and business operations. I combine technical understanding with business thinking to support efficient, data-informed decisions.',
+    viewProjects: 'View Projects',
     viewExperience: 'View Experience',
     getInTouch: 'Get In Touch',
     profileAlt: 'Portrait of Martin Preinsberger',
     metrics: [
       { value: '4', label: 'Professional internships completed/upcoming' },
       { value: '2x', label: 'Edge computing internships at TMC' },
-      { value: '2026', label: 'Expected graduation at HTL Neufelden' },
+      { value: '1', label: 'Diploma project: SwarmX autonomous vehicle system' },
     ],
     aboutTitle: 'About Me',
     aboutBody:
@@ -163,6 +184,28 @@ const translations = {
       {
         title: 'Technology Focus',
         items: ['Edge computing internship projects', 'Business informatics foundation', 'Data-informed decision mindset'],
+      },
+    ],
+    projectsTitle: 'Diploma Project',
+    projectsIntro:
+      'My diploma project brings together embedded systems, sensor technology, software architecture, and a browser-based interface in one working demonstration system.',
+    projects: [
+      {
+        category: 'HTL Neufelden Diploma Project',
+        href: 'https://www.htl-neufelden.at/',
+        logo: logos.htl,
+        logoAlt: 'HTL Neufelden logo',
+        title: 'SwarmX - Swarm-Intelligent Vehicle System',
+        detail:
+          'SwarmX is an autonomous vehicle prototype developed as a research and showcase project for Business Informatics at HTL Neufelden.',
+        outcome:
+          'The system demonstrates how hardware, embedded firmware, communication, orchestration, and user interaction can become a usable end-to-end prototype.',
+        points: [
+          'Self-developed vehicle platform with motor control and mechatronic integration',
+          'FreeRTOS-based low-level firmware for sensors, movement logic, and communication',
+          'DWM/UWB positioning as the basis for navigation and future autonomous mapping',
+          'Browser interface that makes the technical system understandable for demos and public events',
+        ],
       },
     ],
     experienceTitle: 'Experience',
@@ -233,7 +276,7 @@ const translations = {
         logoAlt: 'HTL Neufelden logo',
         date: '05/2026',
         title: 'Leistungsschau 2026 HTL Neufelden',
-        outcome: '1st place in Business Informatics, judged by an independent business jury',
+        outcome: '1st place in Business Informatics, judged by a jury of independent business representatives',
         location: 'Neufelden',
       },
     ],
@@ -267,13 +310,14 @@ const translations = {
     heroTitle: 'Hallo, ich bin Martin Preinsberger - Schüler an der HTL Neufelden.',
     heroLead:
       'Ich bin Betriebsinformatik-Schüler mit praktischer Praktikumserfahrung in Edge Computing, Produktionsplanung und betrieblichen Abläufen. Ich verbinde technisches Verständnis mit wirtschaftlichem Denken, um effiziente und datenbasierte Entscheidungen zu unterstützen.',
+    viewProjects: 'Projekte ansehen',
     viewExperience: 'Erfahrung ansehen',
     getInTouch: 'Kontakt aufnehmen',
     profileAlt: 'Porträt von Martin Preinsberger',
     metrics: [
       { value: '4', label: 'Absolvierte/bevorstehende Berufspraktika' },
       { value: '2x', label: 'Edge-Computing-Praktika bei TMC' },
-      { value: '2026', label: 'Voraussichtlicher Abschluss an der HTL Neufelden' },
+      { value: '1', label: 'Diplomarbeit: autonomes Fahrzeugsystem SwarmX' },
     ],
     aboutTitle: 'Über mich',
     aboutBody:
@@ -291,6 +335,28 @@ const translations = {
       {
         title: 'Technologischer Fokus',
         items: ['Praktikumsprojekte im Edge Computing', 'Grundlagen der Betriebsinformatik', 'Datenorientiertes Entscheidungsdenken'],
+      },
+    ],
+    projectsTitle: 'Diplomarbeit',
+    projectsIntro:
+      'Meine Diplomarbeit verbindet Embedded Systems, Sensorik, Softwarearchitektur und ein browserbasiertes Interface in einem funktionsfähigen Demonstrationssystem.',
+    projects: [
+      {
+        category: 'Diplomarbeit HTL Neufelden',
+        href: 'https://www.htl-neufelden.at/',
+        logo: logos.htl,
+        logoAlt: 'HTL Neufelden Logo',
+        title: 'SwarmX - Schwarmintelligentes Fahrzeugsystem',
+        detail:
+          'SwarmX ist ein autonomer Fahrzeugprototyp, der als Forschungs- und Vorzeigeprojekt des Zweiges Betriebsinformatik an der HTL Neufelden entwickelt wurde.',
+        outcome:
+          'Das System zeigt, wie Hardware, Embedded-Firmware, Kommunikation, Orchestrierung und Benutzerinteraktion zu einem bedienbaren Gesamtprototyp zusammengeführt werden.',
+        points: [
+          'Eigenentwickelte Fahrzeugplattform mit Motorsteuerung und mechatronischer Integration',
+          'FreeRTOS-basierte Low-Level-Firmware für Sensorik, Bewegungslogik und Kommunikation',
+          'DWM-/UWB-Positionsbestimmung als Grundlage für Navigation und potenzielles autonomes Kartografieren',
+          'Browser-Interface, das das technische System für Präsentationen und öffentliche Veranstaltungen verständlich macht',
+        ],
       },
     ],
     experienceTitle: 'Erfahrung',
