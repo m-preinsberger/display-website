@@ -21,8 +21,8 @@
       </div>
       <div class="metrics">
         <article>
-          <p class="metric-value">3</p>
-          <p class="metric-label">Professional internships completed</p>
+          <p class="metric-value">4</p>
+          <p class="metric-label">Professional internships completed/upcoming</p>
         </article>
         <article>
           <p class="metric-value">2x</p>
@@ -78,6 +78,19 @@
       <h2>Experience</h2>
       <div class="grid project-grid">
         <article class="card project-card">
+          <a class="project-company" href="https://www.respory.com/" target="_blank" rel="noreferrer">
+            <img
+              class="company-logo"
+              src="https://www.google.com/s2/favicons?domain=www.respory.com&sz=128"
+              alt="Respory logo"
+            />
+            <span class="project-tag">Respory</span>
+          </a>
+          <h3>Software Engineer Intern</h3>
+          <p>Upcoming &middot; July 2026 &ndash; August 2026</p>
+          <p class="project-outcome">Upcoming software engineering internship.</p>
+        </article>
+        <article class="card project-card">
           <a
             class="project-company"
             href="https://www.tmconnected.com/"
@@ -130,6 +143,71 @@
           <h3>Production Planning and Control Intern</h3>
           <p>Fraham, Upper Austria, Austria · July 2023 (1 month)</p>
           <p class="project-outcome">Contributed to planning and operational coordination activities.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="contests">
+      <h2>Contests</h2>
+      <div class="grid contest-grid">
+        <article class="card project-card contest-card">
+          <a
+            class="project-company"
+            href="https://codingcontest.org/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="company-logo"
+              src="https://www.google.com/s2/favicons?domain=codingcontest.org&sz=128"
+              alt="Cloudflight Coding Contest logo"
+            />
+            <span class="project-tag">Cloudflight Coding Contest</span>
+          </a>
+          <p class="contest-date">10/2024</p>
+          <h3>Cloudflight Coding Contest 40th Edition</h3>
+          <p class="contest-location">Linz</p>
+        </article>
+        <article class="card project-card contest-card">
+          <a
+            class="project-company"
+            href="https://www.countit.at/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="company-logo"
+              src="https://www.google.com/s2/favicons?domain=countit.at&sz=128"
+              alt="COUNT IT logo"
+            />
+            <span class="project-tag">COUNT IT</span>
+          </a>
+          <p class="contest-date">02/2025</p>
+          <h3>Programmier-Challenge CountIT</h3>
+          <p class="project-outcome">HTL Neufelden 2025, Dritter Platz</p>
+          <p class="contest-location">Neufelden</p>
+        </article>
+        <article class="card project-card contest-card">
+          <a
+            class="project-company"
+            href="https://www.htl-neufelden.at/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="company-logo"
+              src="https://www.google.com/s2/favicons?domain=htl-neufelden.at&sz=128"
+              alt="HTL Neufelden logo"
+            />
+            <span class="project-tag">HTL Neufelden</span>
+          </a>
+          <p class="contest-date">05/2026</p>
+          <h3>Leistungsschau 2026 HTL Neufelden</h3>
+          <p class="project-outcome">
+            1. Platz Betriebsinformatik, bewertet durch eine Jury aus unabh&auml;ngigen
+            Vertretern der Wirtschaft
+          </p>
+          <p class="contest-location">Neufelden</p>
         </article>
       </div>
     </section>
