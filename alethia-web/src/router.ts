@@ -5,6 +5,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', name: 'portfolio', component: PortfolioView },
+    { path: '/crazy-learning-zone', name: 'learning', component: () => import('./views/LearningView.vue') },
   ],
 })
 

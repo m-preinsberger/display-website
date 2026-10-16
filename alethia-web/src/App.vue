@@ -1,5 +1,5 @@
 <template>
-  <header class="site-header">
+  <header v-if="$route.name !== 'learning'" class="site-header">
     <nav class="site-tabs" aria-label="Main navigation">
       <RouterLink to="/">Portfolio</RouterLink>
     </nav>
