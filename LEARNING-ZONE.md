@@ -25,6 +25,12 @@ Warm ivory and sage, German copy, responsive layout, and no competitive streaks.
 
 Alternative answers use `|`. Answers ignore case and whitespace, preserve spelling and accents, and allow self-correction. Successful reviews advance through 1, 3, 7, 14, 30 and 60 days. Misses reset to 10 minutes. Three consecutive successes count as “mindestens 3× gewusst”, not medical competence. Future scope: subject notes, source attachments, exam preparation and a calendar.
 
+## Mobile use and examples
+
+Phone layouts use 48px touch controls, 16px inputs to avoid focus zoom, stacked card editing, safe-area padding and sticky review controls. Written practice does not open the keyboard automatically. Small-phone (320px), phone (390px), tablet (768px) and desktop layouts are checked with disposable local data. An internet connection is still required for synchronization; failed saves remain available for retry.
+
+Each card can include a 500-character optional example term or sentence. Examples are shown only after revealing/checking an answer in either practice mode. They are included in backups and can be imported as an optional third tab-separated column. Existing cards and two-column imports remain supported. Editing an example alone preserves review progress.
+
 ## Security and persistence
 
 The login shell is public; all learning data requires a server-verified session. Passwords use salted PBKDF2-SHA256 with 100,000 iterations (Web Crypto compatible). Use a unique password of at least 14 characters. Cookies are Secure, HttpOnly, host-only and SameSite=Strict, and expire after 12 hours. Mutations require a matching Origin. Login attempts are counted atomically in D1 and limited to ten per IP per minute. Stored IP identifiers are hashed with the session secret and time window; expired counters are deleted. Logout clears the cookie; global session revocation requires signing-secret rotation.

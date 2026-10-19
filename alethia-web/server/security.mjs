@@ -50,6 +50,7 @@ export function validData(data) {
     return deck.cards.every(card => {
       if (!card || typeof card.id !== 'string' || card.id.length > 80 || cardIds.has(card.id)) return false
       cardIds.add(card.id)
+      if (card.example !== undefined && (typeof card.example !== 'string' || card.example.length > 500)) return false
       return ['term', 'definition'].every(k => typeof card[k] === 'string' && card[k].trim() && card[k].length <= 500) && Number.isInteger(card.level) && card.level >= 0 && card.level <= 6 && Number.isFinite(card.due) && card.due >= 0
     })
   })

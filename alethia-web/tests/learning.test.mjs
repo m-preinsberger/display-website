@@ -25,7 +25,7 @@ function database() {
 }
 const env = () => ({ LEARNING_PASSWORD_HASH: hash, LEARNING_SESSION_SECRET: secret, LEARNING_DB: database() })
 const req = (path, method = 'GET', body, session, origin = 'https://example.com') => new Request(`https://example.com/api/learning/${path}`, { method, headers: { origin, 'Content-Type': 'application/json', ...(session ? { cookie: session } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) })
-const card = { id: 'c', term: 'a', definition: 'b', level: 0, due: 0 }
+const card = { id: 'c', term: 'a', definition: 'b', example: 'An optional example', level: 0, due: 0 }
 const deck = { id: 'd', title: 'Set', year: 1, cards: [card] }
 test('signed sessions reject forgery, expiration, malformed cookies and rotated secrets', async () => {
   const now = 1800000000000, signed = await token(secret, now)
@@ -57,6 +57,7 @@ test('login, save, reload, update and concurrent-device conflict use real SQLite
     const revision = (await first.json()).revision
     const reload = await (await worker.fetch(req('data', 'GET', undefined, session), bindings)).json()
     assert.equal(reload.data.decks[0].title, 'Set')
+    assert.equal(reload.data.decks[0].cards[0].example, 'An optional example')
     assert.equal(reload.revision, revision)
     assert.equal((await worker.fetch(req('data', 'PUT', { data: { decks: [] }, revision: null }, session), bindings)).status, 409)
     assert.equal((await worker.fetch(req('data', 'PUT', { data: { decks: [] }, revision }, session), bindings)).status, 200)
@@ -88,4 +89,13 @@ test('data validation rejects duplicate IDs, oversized cards and invalid progres
   assert.equal(validData({ decks: [{ ...deck, cards: [{ ...card, level: -1 }] }] }), false)
   assert.equal(validData({ decks: [{ ...deck, cards: [{ ...card, term: 'x'.repeat(501) }] }] }), false)
   assert.equal(validData({ decks: [{ ...deck, year: 4 }] }), false)
+})
+test('optional examples accept legacy cards and reject invalid or oversized examples', () => {
+  const check = example => validData({ decks: [{ ...deck, cards: [{ ...card, example }] }] })
+  assert.equal(check(undefined), true)
+  assert.equal(check(''), true)
+  assert.equal(check('x'.repeat(500)), true)
+  assert.equal(check('x'.repeat(501)), false)
+  assert.equal(check(null), false)
+  assert.equal(check({ text: 'invalid' }), false)
 })
