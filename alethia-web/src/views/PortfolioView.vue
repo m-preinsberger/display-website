@@ -144,6 +144,7 @@ const fallbackLanguage = ref<Language>('en')
 const language = inject<Ref<Language>>('language', fallbackLanguage)
 
 const logos = {
+  bundesheer: 'https://www.google.com/s2/favicons?domain=www.bundesheer.at&sz=128',
   respory: 'https://www.google.com/s2/favicons?domain=www.respory.com&sz=128',
   tmc: 'https://external-content.duckduckgo.com/ip3/www.tmconnected.com.ico',
   peneder: 'https://www.google.com/s2/favicons?domain=www.peneder.com&sz=128',
@@ -156,21 +157,21 @@ const logos = {
 const translations = {
   en: {
     eyebrow: 'Business Engineer Portfolio',
-    heroTitle: "Hi, I'm Martin Preinsberger - Student at HTL Neufelden.",
+    heroTitle: "Hi, I'm Martin Preinsberger - HTL Neufelden graduate.",
     heroLead:
-      'I am a Business Informatics student with hands-on internship experience in edge computing, production planning, and business operations. I combine technical understanding with business thinking to support efficient, data-informed decisions.',
+      'I have a background in Business Informatics and hands-on internship experience in software engineering, edge computing, and production planning. I am currently completing my mandatory military service with the Austrian Armed Forces in Linz.',
     viewProjects: 'View Projects',
     viewExperience: 'View Experience',
     getInTouch: 'Get In Touch',
     profileAlt: 'Portrait of Martin Preinsberger',
     metrics: [
-      { value: '4', label: 'Professional internships completed/upcoming' },
+      { value: '4', label: 'Professional internships completed' },
       { value: '2x', label: 'Edge computing internships at TMC' },
       { value: '1', label: 'Diploma project: SwarmX autonomous vehicle system' },
     ],
     aboutTitle: 'About Me',
     aboutBody:
-      'I am based in Aschach an der Donau, Upper Austria, and currently study Business Informatics at HTL Neufelden. My goal is to develop as a Business Engineer who can connect operations, technology, and management to create practical improvements in real business environments.',
+      'I am from Aschach an der Donau, Upper Austria, and have completed my education in Business Informatics at HTL Neufelden. After finishing my software engineering internship at Respory, I am now serving with the Austrian Armed Forces in Linz. My goal is to connect operations, technology, and management to create practical improvements in real business environments.',
     skillsTitle: 'Core Skills',
     skills: [
       {
@@ -211,13 +212,22 @@ const translations = {
     experienceTitle: 'Experience',
     experience: [
       {
+        company: 'Austrian Armed Forces',
+        href: 'https://www.bundesheer.at/',
+        logo: logos.bundesheer,
+        logoAlt: 'Austrian Armed Forces logo',
+        title: 'Mandatory Military Service',
+        detail: 'Linz, Upper Austria, Austria - Current',
+        outcome: 'Currently completing mandatory military service.',
+      },
+      {
         company: 'Respory',
         href: 'https://www.respory.com/',
         logo: logos.respory,
         logoAlt: 'Respory logo',
         title: 'Software Engineer Intern',
-        detail: 'Upcoming - July 2026 to August 2026',
-        outcome: 'Upcoming software engineering internship.',
+        detail: 'July 2026 to August 2026',
+        outcome: 'Completed a software engineering internship.',
       },
       {
         company: 'Track Machines Connected',
@@ -301,27 +311,27 @@ const translations = {
     ],
     contactTitle: 'Contact',
     contactBody:
-      'Open to internships, project collaboration, and entry-level opportunities in business engineering and business informatics.',
+      'Currently completing my military service in Linz. Happy to connect about project collaboration and future opportunities in business engineering, business informatics, and software development.',
     linkedin: 'LinkedIn Profile',
     location: 'Aschach an der Donau, Upper Austria, Austria',
   },
   de: {
     eyebrow: 'Business-Engineer-Portfolio',
-    heroTitle: 'Hallo, ich bin Martin Preinsberger - Schüler an der HTL Neufelden.',
+    heroTitle: 'Hallo, ich bin Martin Preinsberger - Absolvent der HTL Neufelden.',
     heroLead:
-      'Ich bin Betriebsinformatik-Schüler mit praktischer Praktikumserfahrung in Edge Computing, Produktionsplanung und betrieblichen Abläufen. Ich verbinde technisches Verständnis mit wirtschaftlichem Denken, um effiziente und datenbasierte Entscheidungen zu unterstützen.',
+      'Ich habe eine Ausbildung in Betriebsinformatik und praktische Erfahrung aus Praktika in Softwareentwicklung, Edge Computing und Produktionsplanung. Derzeit leiste ich meinen Grundwehrdienst beim österreichischen Bundesheer in Linz.',
     viewProjects: 'Projekte ansehen',
     viewExperience: 'Erfahrung ansehen',
     getInTouch: 'Kontakt aufnehmen',
     profileAlt: 'Porträt von Martin Preinsberger',
     metrics: [
-      { value: '4', label: 'Absolvierte/bevorstehende Berufspraktika' },
+      { value: '4', label: 'Absolvierte Berufspraktika' },
       { value: '2x', label: 'Edge-Computing-Praktika bei TMC' },
       { value: '1', label: 'Diplomarbeit: autonomes Fahrzeugsystem SwarmX' },
     ],
     aboutTitle: 'Über mich',
     aboutBody:
-      'Ich komme aus Aschach an der Donau in Oberösterreich und besuche derzeit die HTL Neufelden im Zweig Betriebsinformatik. Mein Ziel ist es, mich als Business Engineer weiterzuentwickeln und Abläufe, Technologie und Management so zu verbinden, dass praktische Verbesserungen in Unternehmen entstehen.',
+      'Ich komme aus Aschach an der Donau in Oberösterreich und habe meine Ausbildung in Betriebsinformatik an der HTL Neufelden abgeschlossen. Nach meinem Praktikum in der Softwareentwicklung bei Respory leiste ich nun meinen Grundwehrdienst beim österreichischen Bundesheer in Linz. Mein Ziel ist es, Abläufe, Technologie und Management so zu verbinden, dass praktische Verbesserungen in Unternehmen entstehen.',
     skillsTitle: 'Kernkompetenzen',
     skills: [
       {
@@ -362,13 +372,22 @@ const translations = {
     experienceTitle: 'Erfahrung',
     experience: [
       {
+        company: 'Österreichisches Bundesheer',
+        href: 'https://www.bundesheer.at/',
+        logo: logos.bundesheer,
+        logoAlt: 'Österreichisches Bundesheer Logo',
+        title: 'Grundwehrdienst',
+        detail: 'Linz, Oberösterreich, Österreich - Aktuell',
+        outcome: 'Derzeit leiste ich meinen Grundwehrdienst.',
+      },
+      {
         company: 'Respory',
         href: 'https://www.respory.com/',
         logo: logos.respory,
         logoAlt: 'Respory Logo',
         title: 'Software-Engineer-Praktikant',
-        detail: 'Bevorstehend - Juli 2026 bis August 2026',
-        outcome: 'Bevorstehendes Praktikum im Software Engineering.',
+        detail: 'Juli 2026 bis August 2026',
+        outcome: 'Abgeschlossenes Praktikum in der Softwareentwicklung.',
       },
       {
         company: 'Track Machines Connected',
@@ -452,7 +471,7 @@ const translations = {
     ],
     contactTitle: 'Kontakt',
     contactBody:
-      'Offen für Praktika, Projektzusammenarbeit und Einstiegsmöglichkeiten in Business Engineering und Betriebsinformatik.',
+      'Derzeit leiste ich meinen Grundwehrdienst in Linz. Ich freue mich über den Austausch zu gemeinsamen Projekten und zukünftigen Möglichkeiten in Business Engineering, Betriebsinformatik und Softwareentwicklung.',
     linkedin: 'LinkedIn Profil',
     location: 'Aschach an der Donau, Oberösterreich, Österreich',
   },
