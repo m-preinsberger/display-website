@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import AccountAdmin from '../components/AccountAdmin.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+type User = { id: string; username: string; name: string; role: string }
+const user = ref<User | null>(null), username = ref('')
+function setUser(next: User | null) { user.value = next; document.title = next ? `Crazy Learning Zone · ${next.name}` : 'Crazy Learning Zone' }
 type Card = { id: string; term: string; definition: string; example?: string; level: number; due: number }
 type Deck = { id: string; title: string; year: number; cards: Card[] }
 const authenticated = ref(false), loading = ref(true), busy = ref(false), password = ref(''), error = ref('')
@@ -17,7 +21,7 @@ const current = computed(() => queue.value[index.value])
 const progress = computed(() => queue.value.length ? Math.round(index.value / queue.value.length * 100) : 0)
 const blank = (): Card => ({ id: crypto.randomUUID(), term: '', definition: '', example: '', level: 0, due: 0 })
 async function api(path: string, method = 'GET', body?: unknown) {
-  const response = await fetch(`/api/learning/${path}`, { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) })
+  const response = await fetch(`/api/learning/${path}`, { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...(user.value ? { 'X-Learning-User': user.value.id } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) })
   if (response.ok && !response.headers.get('content-type')?.includes('application/json')) throw new Error('Der Lernserver ist noch nicht verfügbar. Bitte versuche es später erneut.')
   const data = await response.json().catch(() => ({ error: response.status === 429 ? 'Zu viele Versuche. Bitte warte eine Minute.' : 'Der Server ist gerade nicht erreichbar.' }))
   if (!response.ok) {
@@ -35,7 +39,12 @@ async function load() {
 }
 async function login() {
   busy.value = true; error.value = ''
-  try { await api('auth', 'POST', { password: password.value }); password.value = ''; authenticated.value = true; if (!dirty.value) await load() }
+  try {
+    const result = await api('auth', 'POST', { username: username.value, password: password.value })
+    if (user.value?.id !== result.user.id) { decks.value = []; rows.value = []; queue.value = []; dirty.value = false; editing.value = false; dataReady.value = false; revision.value = null; saved.value = '' }
+    setUser(result.user); password.value = ''; authenticated.value = true
+    if (user.value?.role === 'learner' && !dirty.value) await load()
+  }
   catch (e) { error.value = (e as Error).message }
   finally { busy.value = false }
 }
@@ -52,7 +61,7 @@ async function save() {
 async function logout() {
   if ((dirty.value || editing.value) && !window.confirm('Ungespeicherte Änderungen verwerfen und abmelden?')) return
   busy.value = true
-  try { await api('auth', 'DELETE'); authenticated.value = false; decks.value = []; rows.value = []; queue.value = []; studying.value = false; editing.value = false; dirty.value = false; error.value = ''; saved.value = '' }
+  try { await api('auth', 'DELETE'); setUser(null); username.value = ''; dataReady.value = false; revision.value = null; authenticated.value = false; decks.value = []; rows.value = []; queue.value = []; studying.value = false; editing.value = false; dirty.value = false; error.value = ''; saved.value = '' }
   catch (e) { error.value = (e as Error).message }
   finally { busy.value = false }
 }
@@ -106,7 +115,7 @@ async function rate(known: boolean) {
 }
 function backup() {
   const url = URL.createObjectURL(new Blob([JSON.stringify({ version: 1, decks: decks.value }, null, 2)], { type: 'application/json' }))
-  const a = document.createElement('a'); a.href = url; a.download = `grace-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url)
+  const a = document.createElement('a'); a.href = url; a.download = `learning-${user.value?.username || "backup"}-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url)
 }
 async function restore(event: Event) {
   const input = event.target as HTMLInputElement, file = input.files?.[0]; if (!file) return
@@ -128,8 +137,8 @@ async function restore(event: Event) {
 function beforeUnload(e: BeforeUnloadEvent) { if (dirty.value || editing.value) { e.preventDefault(); e.returnValue = '' } }
 const oldTitle = document.title
 onMounted(async () => {
-  document.title = 'Crazy Learning Zone · Für Grace'; window.addEventListener('beforeunload', beforeUnload)
-  try { authenticated.value = (await api('auth')).authenticated; if (authenticated.value) await load() }
+  document.title = 'Crazy Learning Zone'; window.addEventListener('beforeunload', beforeUnload)
+  try { const result = await api('auth'); authenticated.value = result.authenticated; setUser(result.user); if (authenticated.value && user.value?.role === 'learner') await load() }
   catch (e) { error.value = (e as Error).message }
   finally { loading.value = false }
 })
@@ -138,14 +147,15 @@ onUnmounted(() => { document.title = oldTitle; window.removeEventListener('befor
 
 <template>
   <div class="zone" :class="{ studying }" lang="de">
-    <header class="zone-header"><a class="zone-brand" href="/crazy-learning-zone"><span class="brand-mark">g<span>✳</span></span><span>crazy learning zone<small>DEIN KOPF. DEIN TEMPO. DEIN ORT.</small></span></a><span class="private-label">◈ Nur für dich</span><button v-if="authenticated" class="quiet" :disabled="busy" @click="logout">Abmelden ↗</button></header>
+    <header class="zone-header"><a class="zone-brand" href="/crazy-learning-zone"><span class="brand-mark">{{ user?.name.charAt(0).toLocaleLowerCase('de') || 'l' }}<span>✳</span></span><span>crazy learning zone<small>DEIN KOPF. DEIN TEMPO. DEIN ORT.</small></span></a><span class="private-label">◈ Nur für dich</span><button v-if="authenticated" class="quiet" :disabled="busy" @click="logout">Abmelden ↗</button></header>
     <main v-if="loading" class="login-shell"><p role="status">Dein Lernplatz wird vorbereitet …</p></main>
     <main v-else-if="!authenticated" class="login-shell">
       <div class="login-story"><span class="eyebrow">FÜR GRACE, MIT LIEBE</span><h1>Große Ziele.<br>Kleine Schritte.<br><em>Dein Lernplatz.</em></h1><p>Zwischen OP-Alltag und ganz viel neuem Wissen: ein bisschen Ruhe, ein klarer Kopf und ein Ort nur für dich.</p><div class="note">Du musst nicht alles heute können. ♡</div></div>
-      <form class="login-card" @submit.prevent="login"><span class="eyebrow">DEINE PRIVATE LERNZONE</span><h2>Schön, dass du da bist.</h2><p>Mach es dir bequem. Der nächste kleine Schritt wartet schon.</p><label for="password">Dein Passwort</label><input id="password" v-model="password" type="password" autocomplete="current-password" required maxlength="256" placeholder="Nur du kennst es"/><p v-if="error" class="error" role="alert">{{ error }}</p><button class="primary" :disabled="busy">{{ busy ? 'Einen Moment …' : 'Rein in die Lernzone →' }}</button><small>Privater Zugang · Keine öffentliche Registrierung</small></form>
+      <form class="login-card" @submit.prevent="login"><span class="eyebrow">DEINE PRIVATE LERNZONE</span><h2>Schön, dass du da bist.</h2><p>Mach es dir bequem. Der nächste kleine Schritt wartet schon.</p><label for="username">Benutzername</label><input id="username" v-model="username" autocomplete="username" autocapitalize="none" :spellcheck="false" required maxlength="40"/><label for="password">Dein Passwort</label><input id="password" v-model="password" type="password" autocomplete="current-password" required maxlength="256" placeholder="Nur du kennst es"/><p v-if="error" class="error" role="alert">{{ error }}</p><button class="primary" :disabled="busy">{{ busy ? 'Einen Moment …' : 'Rein in die Lernzone →' }}</button><small>Privater Zugang · Keine öffentliche Registrierung</small></form>
     </main>
+    <AccountAdmin v-else-if="user?.role === 'admin'" :api="api"/>
     <main v-else class="workspace">
-      <aside class="sidebar"><span class="eyebrow">DEIN LERNRAUM</span><button class="nav-active" @click="studying = false">▦ &nbsp; Vokabelstudio</button><div class="journey"><span class="eyebrow">DEIN WEG ZUR OTA</span><p>Drei Jahre.<br>So viele Möglichkeiten.</p><div v-for="n in 3" :key="n" class="year-line"><span>{{ n }}</span> Ausbildungsjahr {{ n }}</div></div><div class="sidebar-note">Ein Wort nach dem anderen.<br>Du schaffst das, Grace. ♡</div><button class="quiet" @click="backup">↓ Backup herunterladen</button><label class="restore">↑ Backup wiederherstellen<input type="file" accept="application/json,.json" :disabled="busy || dirty || studying || editing" @change="restore"/></label></aside>
+      <aside class="sidebar"><span class="eyebrow">DEIN LERNRAUM</span><button class="nav-active" @click="studying = false">▦ &nbsp; Vokabelstudio</button><div class="journey"><span class="eyebrow">DEIN WEG ZUR OTA</span><p>Drei Jahre.<br>So viele Möglichkeiten.</p><div v-for="n in 3" :key="n" class="year-line"><span>{{ n }}</span> Ausbildungsjahr {{ n }}</div></div><div class="sidebar-note">Ein Wort nach dem anderen.<br>Du schaffst das, {{ user?.name }}. ♡</div><button class="quiet" @click="backup">↓ Backup herunterladen</button><label class="restore">↑ Backup wiederherstellen<input type="file" accept="application/json,.json" :disabled="busy || dirty || studying || editing" @change="restore"/></label></aside>
       <section class="content">
         <div class="topline"><span class="eyebrow">DEIN VOKABELSTUDIO</span><span class="save-state" role="status">{{ busy ? 'Wird gespeichert …' : dirty ? 'Ungespeicherte Änderungen' : saved || 'Privat & synchronisiert' }}</span></div>
         <div v-if="error" class="error" role="alert">{{ error }} <button v-if="dirty" :disabled="busy" @click="save">Speichern erneut versuchen</button><button v-else :disabled="busy" @click="load().catch(e => error = e.message)">Erneut laden</button></div>
@@ -160,7 +170,7 @@ onUnmounted(() => { document.title = oldTitle; window.removeEventListener('befor
           <div v-else class="finish panel"><span class="finish-icon">✳</span><h2>{{ queue.length ? 'Ein Stück weiter. Gut gemacht.' : 'Alles wiederholt. Durchatmen.' }}</h2><p v-if="queue.length">{{ score }} von {{ queue.length }} Karten gewusst. Jeder Versuch zählt.</p><p v-else>In diesem Set sind gerade keine Karten fällig.</p><button class="primary" @click="studying = false">Zurück zur Übersicht</button></div>
         </template>
         <template v-else>
-          <div class="section-heading"><div><h1>Hey Grace.<br><em>Was lernen wir heute?</em></h1><p>Ein kleiner Anfang ist auch ein Anfang.</p></div><button class="primary" :disabled="busy || dirty" @click="edit()">+ Neues Lernset</button></div>
+          <div class="section-heading"><div><h1>Hey {{ user?.name }}.<br><em>Was lernen wir heute?</em></h1><p>Ein kleiner Anfang ist auch ein Anfang.</p></div><button class="primary" :disabled="busy || dirty" @click="edit()">+ Neues Lernset</button></div>
           <div class="stats"><div><span class="stat-icon">↺</span><strong>{{ due }}</strong><span>bereit zum Wiederholen</span></div><div><span class="stat-icon">✳</span><strong>{{ learned }}</strong><span>mindestens 3× gewusst</span></div><div><span class="stat-icon">▤</span><strong>{{ decks.length }}</strong><span>Sets voller Wissen</span></div></div>
           <div class="library-heading"><h2>Deine Lernsets <span>{{ decks.length }}</span></h2><div class="filters"><input v-model="search" aria-label="Lernsets suchen" placeholder="Lernset suchen …"/><select v-model="year" aria-label="Ausbildungsjahr filtern"><option :value="0">Alle Jahre</option><option v-for="n in 3" :key="n" :value="n">{{ n }}. Jahr</option></select></div></div>
           <div v-if="!decks.length" class="empty panel"><div class="empty-art">a <span>↔</span> α</div><h2>Dein erstes Set ist der Anfang.</h2><p>Latein, Anatomie oder Fachbegriffe: bring deine eigenen Schulunterlagen mit. Erstelle Karten einzeln oder importiere eine ganze Liste.</p><button class="primary" :disabled="busy || dirty" @click="edit()">Mein erstes Lernset erstellen →</button></div>

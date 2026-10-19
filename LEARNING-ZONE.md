@@ -12,7 +12,7 @@ Cloudflare's existing build command is `npm run build`, repository root, output 
 
 In Workers & Pages → display-website → Settings → Production:
 
-1. Create a D1 database named `grace-learning`, preferably with EU jurisdiction, and bind it as **LEARNING_DB**. The Worker creates its two tables automatically. Do not bind production storage to preview deployments or the separate `private-planner` project.
+1. Create a D1 database named `grace-learning`, preferably with EU jurisdiction, and bind it as **LEARNING_DB**. The Worker creates its tables automatically. Do not bind production storage to preview deployments or the separate `private-planner` project.
 2. Add two encrypted secrets: **LEARNING_PASSWORD_HASH** and **LEARNING_SESSION_SECRET**. Generate them using `node alethia-web/scripts/learning-secrets.mjs` (hidden terminal prompt), or run `node alethia-web/scripts/login-setup-server.mjs` and open http://127.0.0.1:4178/ . The browser helper runs entirely locally and does not transmit the chosen password. Copy the generated settings into Cloudflare's Import .env form, mark both Secret, and save. Neither secret belongs in Git or chat.
 3. Push the completed code to `main` to deploy. Changes to secrets/bindings also require a new deployment. No missing configuration allows private data access.
 4. Smoke-test login, create/edit a set, reload, practice, logout, and anonymous data denial. The API endpoints are `/api/learning/auth` and `/api/learning/data`.
@@ -35,7 +35,7 @@ Each card can include a 500-character optional example term or sentence. Example
 
 The login shell is public; all learning data requires a server-verified session. Passwords use salted PBKDF2-SHA256 with 100,000 iterations (Web Crypto compatible). Use a unique password of at least 14 characters. Cookies are Secure, HttpOnly, host-only and SameSite=Strict, and expire after 12 hours. Mutations require a matching Origin. Login attempts are counted atomically in D1 and limited to ten per IP per minute. Stored IP identifiers are hashed with the session secret and time window; expired counters are deleted. Logout clears the cookie; global session revocation requires signing-secret rotation.
 
-D1 holds the workspace and review progress. Primary-session reads and conditional revision writes prevent stale reads and silent overwrites between devices. Conflicts preserve the local unsaved state for backup before reloading. No private data is placed in localStorage. Backups contain private learning data. This is a single shared private workspace, with no public sign-up or patient-record workflow.
+D1 holds the workspace and review progress. Primary-session reads and conditional revision writes prevent stale reads and silent overwrites between devices. Conflicts preserve the local unsaved state for backup before reloading. No private data is placed in localStorage. Backups contain private learning data. Each learner has an isolated workspace, with no public sign-up or patient-record workflow.
 
 ## Checks
 
@@ -44,3 +44,14 @@ D1 holds the workspace and review progress. Primary-session reads and conditiona
 - Plain Vite previews the UI but cannot authenticate without the Worker; there is no login bypass.
 
 References: [Cloudflare Pages advanced mode](https://developers.cloudflare.com/pages/functions/advanced-mode/), [D1 bindings](https://developers.cloudflare.com/pages/functions/bindings/#d1-databases), [Web Crypto](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/).
+
+
+## Managed accounts
+
+Login now uses a username and password. Grace uses `grace` and her existing password; her existing workspace remains under the same ID. The first API request creates her account from LEARNING_PASSWORD_HASH without overwriting existing accounts. Old shared-password sessions require login again.
+
+To enable administration, run `node alethia-web/scripts/learning-secrets.mjs --admin` locally, choose a separate password, and add its output as the encrypted Cloudflare secret **LEARNING_ADMIN_PASSWORD_HASH**. Keep the existing LEARNING_PASSWORD_HASH and LEARNING_SESSION_SECRET. Redeploy, then sign in at `/crazy-learning-zone` as `admin`. This opens account management directly, also on mobile. No email or registration service is needed.
+
+Admin can create learners, change usernames/display names, reset passwords, and disable/re-enable accounts. Passwords cannot be retrieved. Names personalize greetings, the brand initial, and the page title. Each new learner starts with an empty collection. Disabling keeps all learning data. Every learner edit revokes that learner's existing sessions. Admin cannot access learner data through the data API. To reset the admin password, replace the admin hash and rotate LEARNING_SESSION_SECRET to revoke outstanding sessions, then redeploy. Grace's password is managed in the panel after migration; changing the original seed secret does not reset an existing account.
+
+The additional `/api/learning/users` endpoint requires admin authentication. Account sessions carry signed user IDs and versions and are checked against account status on every request. Workspace writes also check the browser's account ID to prevent unsaved work being written to a different account after another tab signs in.

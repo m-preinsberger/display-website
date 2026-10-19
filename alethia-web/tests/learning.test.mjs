@@ -15,6 +15,7 @@ function database() {
       let args = []
       return {
         bind(...values) { args = values; return this },
+        async all() { return { results: sqlite.prepare(sql).all(...args) } },
         async first() { return sqlite.prepare(sql).get(...args) || null },
         async run() { return { meta: { changes: sqlite.prepare(sql).run(...args).changes } } },
       }
@@ -24,7 +25,7 @@ function database() {
   }
 }
 const env = () => ({ LEARNING_PASSWORD_HASH: hash, LEARNING_SESSION_SECRET: secret, LEARNING_DB: database() })
-const req = (path, method = 'GET', body, session, origin = 'https://example.com') => new Request(`https://example.com/api/learning/${path}`, { method, headers: { origin, 'Content-Type': 'application/json', ...(session ? { cookie: session } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) })
+const req = (path, method = 'GET', body, session, origin = 'https://example.com') => new Request(`https://example.com/api/learning/${path}`, { method, headers: { origin, 'Content-Type': 'application/json', ...(session ? { cookie: session, 'X-Learning-User': session.split('.')[1] || '' } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) })
 const card = { id: 'c', term: 'a', definition: 'b', example: 'An optional example', level: 0, due: 0 }
 const deck = { id: 'd', title: 'Set', year: 1, cards: [card] }
 test('signed sessions reject forgery, expiration, malformed cookies and rotated secrets', async () => {
@@ -98,4 +99,46 @@ test('optional examples accept legacy cards and reject invalid or oversized exam
   assert.equal(check('x'.repeat(501)), false)
   assert.equal(check(null), false)
   assert.equal(check({ text: 'invalid' }), false)
+})
+
+test('admin manages isolated accounts and revokes learner sessions', async () => {
+  const bindings = { ...env(), LEARNING_ADMIN_PASSWORD_HASH: hash }
+  const call = (path, method, body, session, origin) => worker.fetch(req(path, method, body, session, origin), bindings)
+  const login = async username => {
+    const response = await call('auth', 'POST', { username, password: username === 'friend' ? 'a-long-new-password' : 'test-password' })
+    assert.equal(response.status, 200)
+    return response.headers.get('set-cookie').split(';')[0]
+  }
+  try {
+    const grace = await login('grace'), admin = await login('admin')
+    assert.equal((await call('users', 'GET')).status, 401)
+    assert.equal((await call('users', 'GET', undefined, grace)).status, 403)
+    assert.equal((await call('data', 'GET', undefined, admin)).status, 403)
+    await call('data', 'PUT', { data: { decks: [deck] }, revision: null }, grace)
+    const account = { username: 'friend', name: 'Friend', password: 'a-long-new-password', disabled: false }
+    assert.equal((await call('users', 'POST', account, admin, 'https://evil.example')).status, 403)
+    assert.equal((await call('users', 'POST', account, grace)).status, 403)
+    assert.equal((await call('users', 'POST', account, admin)).status, 201)
+    assert.equal((await call('users', 'POST', account, admin)).status, 409)
+    const friend = await login('friend')
+    assert.deepEqual((await (await call('data', 'GET', undefined, friend)).json()).data, { decks: [] })
+    assert.equal((await call('data', 'PUT', { data: { decks: [] }, revision: null }, friend)).status, 200)
+    assert.equal((await (await call('data', 'GET', undefined, grace)).json()).data.decks.length, 1)
+    const stale = req('data', 'PUT', { data: { decks: [] }, revision: null }, friend)
+    stale.headers.set('X-Learning-User', 'grace')
+    const staleResponse = await worker.fetch(stale, bindings)
+    assert.equal(staleResponse.status, 409)
+    assert.match((await staleResponse.json()).error, /aktive Konto/)
+    const list = (await (await call('users', 'GET', undefined, admin)).json()).users
+    assert.equal(list.some(u => 'password' in u), false)
+    const stored = list.find(u => u.username === 'friend')
+    assert.equal((await call('users', 'PUT', { ...stored, name: 'New Name', password: '' }, admin)).status, 200)
+    assert.equal((await call('data', 'GET', undefined, friend)).status, 401)
+    const renewed = await login('friend')
+    assert.equal((await (await call('auth', 'GET', undefined, renewed)).json()).user.name, 'New Name')
+    await call('users', 'PUT', { ...stored, password: 'another-long-password', disabled: true }, admin)
+    assert.equal((await call('data', 'GET', undefined, renewed)).status, 401)
+    assert.equal((await call('auth', 'POST', { username: 'friend', password: 'another-long-password' })).status, 401)
+    assert.equal((await call('data', 'GET', undefined, `__Host-grace=${await token(secret)}`)).status, 401)
+  } finally { bindings.LEARNING_DB.close() }
 })

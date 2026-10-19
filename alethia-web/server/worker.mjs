@@ -1,4 +1,4 @@
-import { configured, verifyPassword, token, authorized, cookie, reply, sameOrigin, validData } from './security.mjs'
+import { configured, verifyPassword, accountToken, accountSession, hashPassword, cookie, reply, sameOrigin, validData } from './security.mjs'
 
 async function database(env) {
   if (!env.LEARNING_DB) throw new Error('Missing database binding')
@@ -6,14 +6,57 @@ async function database(env) {
   const db = env.LEARNING_DB.withSession ? env.LEARNING_DB.withSession('first-primary') : env.LEARNING_DB
   await db.batch([
     db.prepare('CREATE TABLE IF NOT EXISTS learning_workspace (id TEXT PRIMARY KEY, data TEXT NOT NULL, revision TEXT NOT NULL)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS learning_users (id TEXT PRIMARY KEY, username TEXT NOT NULL UNIQUE, name TEXT NOT NULL, password TEXT NOT NULL, role TEXT NOT NULL, disabled INTEGER NOT NULL DEFAULT 0, version INTEGER NOT NULL DEFAULT 1)'),
     db.prepare('CREATE TABLE IF NOT EXISTS learning_attempts (id TEXT PRIMARY KEY, attempts INTEGER NOT NULL, expires INTEGER NOT NULL)'),
   ])
+  await db.prepare("INSERT INTO learning_users (id, username, name, password, role) VALUES ('grace', 'grace', 'Grace', ?, 'learner') ON CONFLICT DO NOTHING").bind(env.LEARNING_PASSWORD_HASH).run()
   return db
+}
+
+const publicUser = user => ({ id: user.id, username: user.username, name: user.name, role: user.role, disabled: Boolean(user.disabled) })
+async function currentUser(request, env, db) {
+  const session = await accountSession(request, env.LEARNING_SESSION_SECRET)
+  if (!session) return null
+  if (session.id === 'admin') return env.LEARNING_ADMIN_PASSWORD_HASH && session.version === 1 ? { id: 'admin', username: 'admin', name: 'Admin', role: 'admin', version: 1 } : null
+  const user = await db.prepare('SELECT * FROM learning_users WHERE id = ?').bind(session.id).first()
+  return user && !user.disabled && user.version === session.version ? user : null
+}
+
+export async function handleUsers(request, env) {
+  if (!configured(env)) return reply({ error: 'Der Lernbereich wird noch eingerichtet.' }, 503)
+  const db = await database(env), admin = await currentUser(request, env, db)
+  if (!admin) return reply({ error: 'Bitte melde dich erneut an.' }, 401)
+  if (admin.role !== 'admin') return reply({ error: 'Nur für die Verwaltung.' }, 403)
+  if (request.method === 'GET') {
+    const result = await db.prepare('SELECT id, username, name, role, disabled FROM learning_users ORDER BY username').all()
+    return reply({ users: result.results.map(publicUser) })
+  }
+  if (!sameOrigin(request)) return reply({ error: 'Ungültige Anfrage.' }, 403)
+  if (!['POST', 'PUT'].includes(request.method)) return reply({ error: 'Methode nicht erlaubt.' }, 405)
+  const text = await request.text()
+  if (text.length > 4096) return reply({ error: 'Anfrage zu groß.' }, 413)
+  let body
+  try { body = JSON.parse(text) } catch { return reply({ error: 'Ungültige Anfrage.' }, 400) }
+  const username = typeof body?.username === 'string' ? body.username.trim().toLowerCase() : ''
+  const name = typeof body?.name === 'string' ? body.name.trim() : ''
+  if (!/^[a-z0-9][a-z0-9._-]{2,39}$/.test(username) || username === 'admin' || !name || name.length > 80 || typeof body.password !== 'string' || (body.password && (body.password.length < 14 || body.password.length > 256)) || typeof body.disabled !== 'boolean') return reply({ error: 'Name, Benutzername (3–40 Zeichen) und Passwort (14–256 Zeichen) prüfen.' }, 400)
+  const creating = request.method === 'POST'
+  if (creating && !body.password) return reply({ error: 'Bitte ein Passwort festlegen.' }, 400)
+  const existing = creating ? null : await db.prepare('SELECT * FROM learning_users WHERE id = ?').bind(typeof body.id === 'string' ? body.id : '').first()
+  if (!creating && !existing) return reply({ error: 'Konto nicht gefunden.' }, 404)
+  const duplicate = await db.prepare('SELECT id FROM learning_users WHERE username = ?').bind(username).first()
+  if (duplicate && duplicate.id !== existing?.id) return reply({ error: 'Dieser Benutzername ist bereits vergeben.' }, 409)
+  const password = body.password ? await hashPassword(body.password) : existing.password
+  try {
+    if (creating) await db.prepare("INSERT INTO learning_users (id, username, name, password, role, disabled) VALUES (?, ?, ?, ?, 'learner', ?)").bind(crypto.randomUUID(), username, name, password, Number(body.disabled)).run()
+    else await db.prepare('UPDATE learning_users SET username = ?, name = ?, password = ?, disabled = ?, version = version + 1 WHERE id = ?').bind(username, name, password, Number(body.disabled), existing.id).run()
+  } catch (e) { if (String(e).includes('UNIQUE')) return reply({ error: 'Dieser Benutzername ist bereits vergeben.' }, 409); throw e }
+  return reply({ saved: true }, creating ? 201 : 200)
 }
 
 export async function handleAuth(request, env) {
   if (!configured(env)) return reply({ error: 'Der Lernbereich wird noch eingerichtet. Bitte versuche es später erneut.' }, 503)
-  if (request.method === 'GET') return reply({ authenticated: await authorized(request, env.LEARNING_SESSION_SECRET) })
+  if (request.method === 'GET') { const user = await currentUser(request, env, await database(env)); return reply({ authenticated: Boolean(user), user: user ? publicUser(user) : null }) }
   if (!sameOrigin(request)) return reply({ error: 'Ungültige Anfrage.' }, 403)
   if (request.method === 'DELETE') return reply({ authenticated: false }, 200, { 'Set-Cookie': cookie('', 0) })
   if (request.method !== 'POST') return reply({ error: 'Methode nicht erlaubt.' }, 405)
@@ -31,20 +74,27 @@ export async function handleAuth(request, env) {
   await db.prepare('DELETE FROM learning_attempts WHERE expires < ?').bind(minute).run()
   const attempt = await db.prepare('INSERT INTO learning_attempts (id, attempts, expires) VALUES (?, 1, ?) ON CONFLICT(id) DO UPDATE SET attempts = attempts + 1 RETURNING attempts').bind(key, minute + 2).first()
   if (attempt.attempts > 10) return reply({ error: 'Zu viele Versuche. Bitte warte eine Minute.' }, 429, { 'Retry-After': '60' })
-  if (!await verifyPassword(body.password, env.LEARNING_PASSWORD_HASH)) return reply({ error: 'Das Passwort stimmt leider nicht.' }, 401)
-  return reply({ authenticated: true }, 200, { 'Set-Cookie': cookie(await token(env.LEARNING_SESSION_SECRET)) })
+  const username = typeof body.username === 'string' ? body.username.trim().toLowerCase() : 'grace'
+  const user = username === 'admin'
+    ? (env.LEARNING_ADMIN_PASSWORD_HASH ? { id: 'admin', username: 'admin', name: 'Admin', role: 'admin', version: 1, password: env.LEARNING_ADMIN_PASSWORD_HASH } : null)
+    : await db.prepare('SELECT * FROM learning_users WHERE username = ?').bind(username).first()
+  const matches = await verifyPassword(body.password, user?.password || env.LEARNING_PASSWORD_HASH)
+  if (!user || user.disabled || !matches) return reply({ error: 'Benutzername oder Passwort stimmt leider nicht.' }, 401)
+  return reply({ authenticated: true, user: publicUser(user) }, 200, { 'Set-Cookie': cookie(await accountToken(env.LEARNING_SESSION_SECRET, user)) })
 }
 
 export async function handleData(request, env) {
   if (!configured(env)) return reply({ error: 'Der Lernbereich wird noch eingerichtet.' }, 503)
-  if (!await authorized(request, env.LEARNING_SESSION_SECRET)) return reply({ error: 'Bitte melde dich erneut an.' }, 401)
+  const db = await database(env), user = await currentUser(request, env, db)
+  if (!user) return reply({ error: 'Bitte melde dich erneut an.' }, 401)
   if (!['GET', 'PUT'].includes(request.method)) return reply({ error: 'Methode nicht erlaubt.' }, 405)
   if (request.method === 'PUT' && !sameOrigin(request)) return reply({ error: 'Ungültige Anfrage.' }, 403)
-  const db = await database(env)
+  if (user.role !== 'learner') return reply({ error: 'Bitte ein Lernkonto verwenden.' }, 403)
   if (request.method === 'GET') {
-    const row = await db.prepare('SELECT data, revision FROM learning_workspace WHERE id = ?').bind('grace').first()
+    const row = await db.prepare('SELECT data, revision FROM learning_workspace WHERE id = ?').bind(user.id).first()
     return reply({ data: row ? JSON.parse(row.data) : { decks: [] }, revision: row?.revision || null })
   }
+  if (request.headers.get('X-Learning-User') !== user.id) return reply({ error: 'Das aktive Konto hat sich geändert. Bitte lade die Seite neu.' }, 409)
   const text = await request.text()
   if (new TextEncoder().encode(text).length > 1500000) return reply({ error: 'Die Sammlung ist zu groß (max. 1,5 MB).' }, 413)
   let body
@@ -52,8 +102,8 @@ export async function handleData(request, env) {
   if (!validData(body?.data) || !(body.revision === null || typeof body.revision === 'string')) return reply({ error: 'Ungültige Lerndaten.' }, 400)
   const revision = crypto.randomUUID()
   const result = body.revision === null
-    ? await db.prepare('INSERT INTO learning_workspace (id, data, revision) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING').bind('grace', JSON.stringify(body.data), revision).run()
-    : await db.prepare('UPDATE learning_workspace SET data = ?, revision = ? WHERE id = ? AND revision = ?').bind(JSON.stringify(body.data), revision, 'grace', body.revision).run()
+    ? await db.prepare('INSERT INTO learning_workspace (id, data, revision) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING').bind(user.id, JSON.stringify(body.data), revision).run()
+    : await db.prepare('UPDATE learning_workspace SET data = ?, revision = ? WHERE id = ? AND revision = ?').bind(JSON.stringify(body.data), revision, user.id, body.revision).run()
   if (result.meta.changes !== 1) return reply({ error: 'Auf einem anderen Gerät wurde etwas geändert. Sichere deine Änderungen als Backup und lade die Seite neu.' }, 409)
   return reply({ revision })
 }
@@ -64,6 +114,7 @@ export default {
     if (!path.startsWith('/api/learning/')) return env.ASSETS.fetch(request)
     try {
       if (path === '/api/learning/auth') return await handleAuth(request, env)
+      if (path === '/api/learning/users') return await handleUsers(request, env)
       if (path === '/api/learning/data') return await handleData(request, env)
       return reply({ error: 'Nicht gefunden.' }, 404)
     } catch { return reply({ error: 'Der Lernserver ist gerade nicht verfügbar. Bitte versuche es erneut.' }, 503) }

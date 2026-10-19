@@ -55,3 +55,20 @@ export function validData(data) {
     })
   })
 }
+
+export async function hashPassword(password) {
+  const salt = hex(crypto.getRandomValues(new Uint8Array(16)))
+  const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits'])
+  return `pbkdf2:100000:${salt}:${hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: encoder.encode(salt), iterations: 100000, hash: 'SHA-256' }, key, 256))}`
+}
+export async function accountToken(secret, user) {
+  const payload = `${Math.floor(Date.now() / 1000) + ttl}.${user.id}.${user.version}`
+  return `${payload}.${hex(await crypto.subtle.sign('HMAC', await hmacKey(secret), encoder.encode(payload)))}`
+}
+export async function accountSession(request, secret) {
+  const value = (request.headers.get('cookie') || '').split(';').map(s => s.trim()).find(s => s.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1)
+  if (!value || !/^\d{10}\.[a-z0-9-]{1,80}\.\d+\.[a-f0-9]{64}$/.test(value)) return null
+  const [expires, id, version, signature] = value.split('.')
+  const payload = `${expires}.${id}.${version}`
+  return Number(expires) > Date.now() / 1000 && await crypto.subtle.verify('HMAC', await hmacKey(secret), unhex(signature), encoder.encode(payload)) ? { id, version: Number(version) } : null
+}

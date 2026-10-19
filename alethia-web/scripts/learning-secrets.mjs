@@ -26,5 +26,6 @@ if (password.length < 14 || password.length > 256) {
   process.exit(1)
 }
 const salt = randomBytes(16).toString('hex')
-console.log(`LEARNING_PASSWORD_HASH=pbkdf2:100000:${salt}:${pbkdf2Sync(password, salt, 100000, 32, 'sha256').toString('hex')}`)
-console.log(`LEARNING_SESSION_SECRET=${randomBytes(48).toString('base64url')}`)
+const admin = process.argv.includes('--admin')
+console.log(`${admin ? 'LEARNING_ADMIN_PASSWORD_HASH' : 'LEARNING_PASSWORD_HASH'}=pbkdf2:100000:${salt}:${pbkdf2Sync(password, salt, 100000, 32, 'sha256').toString('hex')}`)
+if (!admin) console.log(`LEARNING_SESSION_SECRET=${randomBytes(48).toString('base64url')}`)
